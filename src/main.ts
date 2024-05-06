@@ -38,7 +38,7 @@ const sdk: SpotifyApi | null = navigator.onLine
 
 window.onload = async () => {
   if (!sdk) return
-  const user = await sdk.currentUser.profile()
+  await sdk.currentUser.profile()
 }
 
 const player = new Player(sdk, localforage)
