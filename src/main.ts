@@ -26,7 +26,7 @@ eruda.init()
 const sdk: SpotifyApi | null = navigator.onLine
   ? SpotifyApi.withUserAuthorization(
       import.meta.env.VITE_SPOTIFY_CLIENT_ID,
-      window.location.origin,
+      window.location.origin + window.location.pathname,
       [
         'user-read-private',
         'user-read-email',
