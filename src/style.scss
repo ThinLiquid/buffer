@@ -209,6 +209,7 @@ body {
     background: var(--accent);
     border: none;
     height: 50px;
+    min-height: 50px;
     display: none;
 
     @media screen and (max-width: 750px) {
