@@ -49,7 +49,7 @@ class SearchPalette {
     this.jump.appendTo(this.element)
     this.container.appendTo(this.element)
 
-    this.renderCached()
+    this.localForage.ready(() => this.renderCached())
 
     this.registerEvents()
   }
