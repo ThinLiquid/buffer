@@ -182,6 +182,11 @@ class SearchPalette {
       keys.forEach(async key => {
         const data: CachedData | null = await this.localForage.getItem(key)
         if (data == null) return
+        if (data.image == null) return
+        if (data.track == null) return
+        if (data.track.name == null) return
+        if (data.track.artists == null) return
+
         const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
         const icon = new HTML('img').classOn('image').attr({ src: data.image })
         const meta = new HTML('span').text(
