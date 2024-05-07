@@ -185,16 +185,18 @@ class Player {
     this.streamAudio(url, track, image)
 
     // Save the track to cache
-    const buffer = await this.createAudioBuffer()
-    this.localForage.setItem(track.id, {
-      buffers: {
-        left: buffer.getChannelData(0).buffer,
-        right: buffer.getChannelData(1).buffer,
-        sampleRate: buffer.sampleRate
-      },
-      track,
-      image: await this.urltoB64(track.album.images[0].url)
-    } as CachedData)
+    ;(async () => {
+      const buffer = await this.createAudioBuffer()
+      this.localForage.setItem(track.id, {
+        buffers: {
+          left: buffer.getChannelData(0).buffer,
+          right: buffer.getChannelData(1).buffer,
+          sampleRate: buffer.sampleRate
+        },
+        track,
+        image: await this.urltoB64(track.album.images[0].url)
+      } as CachedData)
+    })()
 
     this.queueIndex++
   }
