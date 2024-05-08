@@ -99,7 +99,6 @@ class Queue {
    * @memberof Queue
    */
   get currentTrack (): TrackWithUUID {
-    console.log(this.tracks[this.index - 1])
     return this.tracks[this.index - 1]
   }
 }
