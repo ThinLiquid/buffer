@@ -148,7 +148,7 @@ class Lyrics {
       const prevLyricText =
         index === lyricsData.length - 1 ? '' : lyricsData[index + 1].text
       const nextLyricText =
-        index === 0 ? DEFAULT_TEXT : lyricsData[index - 1].text
+        index === 0 ? DEFAULT_TEXT : lyricsData[index].text
 
       this.current.classOff('appear')
       this.prev.classOff('appear')
