@@ -1,6 +1,5 @@
 import './style.scss'
 import 'material-symbols'
-import eruda from 'eruda'
 
 import HTML from '@datkat21/html'
 import { SpotifyApi } from '@spotify/web-api-ts-sdk'
@@ -30,7 +29,10 @@ await localforage.setDriver([
   localforage.LOCALSTORAGE
 ])
 
-eruda.init()
+if (import.meta.env.DEV) {
+  const { default: eruda } = await import('eruda')
+  eruda.init()
+}
 
 const auth = (): SpotifyApi => SpotifyApi.withUserAuthorization(
   import.meta.env.VITE_SPOTIFY_CLIENT_ID,
