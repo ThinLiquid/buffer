@@ -1,22 +1,33 @@
 import HTML from '@datkat21/html'
-import { SearchResults, SpotifyApi } from '@spotify/web-api-ts-sdk'
+import { Album, Playlist, SearchResults, SimplifiedAlbum, SpotifyApi, Track } from '@spotify/web-api-ts-sdk'
 import Player from './player'
 import localforage from 'localforage'
 import { CachedData } from './types'
 import { throttle } from 'throttle-debounce'
+import Queue from './queue'
 
 class SearchPalette {
-  private element: HTML
-  private input: HTML
-  private jump: HTML
-  private container: HTML
-  private close: HTML
+  private readonly element: HTML
+  private readonly input: HTML
+  private readonly jump: HTML
+  private readonly container: HTML
+  private readonly close: HTML
 
+  /**
+   * Create a new search palette instance
+   *
+   * @param sdk The Spotify API instance
+   * @param player The player instance
+   * @param localForage The localForage instance
+   * @param queue The queue instance
+   */
   constructor (
     private readonly sdk: SpotifyApi | null,
     private readonly player: Player,
-    private readonly localForage: typeof localforage
+    private readonly localForage: typeof localforage,
+    private readonly queue: Queue
   ) {
+    // Initialize the elements
     this.element = new HTML('div')
     this.input = new HTML('input').attr({
       type: 'text',
@@ -36,10 +47,17 @@ class SearchPalette {
       .classOn('material-symbols-sharp')
       .text('close')
 
-    this.init()
+    // Initialize the search palette
+    this.init().catch(console.error)
   }
 
-  private init () {
+  /**
+   * Initialize the search palette
+   *
+   * @private
+   */
+  private async init (): Promise<void> {
+    // Append the elements to the document
     this.element.classOn('searchpal')
     this.element.appendTo(document.body)
 
@@ -49,14 +67,236 @@ class SearchPalette {
     this.jump.appendTo(this.element)
     this.container.appendTo(this.element)
 
-    this.localForage.ready(() => this.renderCached())
+    // Fill the search palette with cached data
+    await this.localForage.ready(() => this.renderCached())
 
+    // Register the events
     this.registerEvents()
   }
 
-  private render (results: SearchResults<['track', 'album', 'playlist']>) {
+  /**
+   * Add the tracks of an album to the queue
+   *
+   * @private
+   * @param album The album to add the tracks of
+   * @memberof SearchPalette
+   */
+  private async addAlbumTracks (album: Album['id']): Promise<void> {
+    if (this.sdk == null) return
+    const albumData = await this.sdk.albums.get(album)
+    const tracks = albumData.tracks.items.map(async track => {
+      if (this.sdk == null) return
+      return await this.sdk.tracks.get(track.id)
+    })
+    const filteredTracks = (await Promise.all(tracks)).filter(track => track != null) as Track[]
+    this.queue.add(...filteredTracks)
+  }
+
+  /**
+   * Load the tracks of an album
+   *
+   * @private
+   * @param album The album to load the tracks of
+   * @memberof SearchPalette
+   */
+  private async loadAlbumTracks (album: Album['id']): Promise<void> {
+    if (this.sdk == null) return
+    const albumData = await this.sdk.albums.get(album)
+    const tracks = albumData.tracks.items.map(async track => {
+      if (this.sdk == null) return
+      return await this.sdk.tracks.get(track.id)
+    })
+    const filteredTracks = (await Promise.all(tracks)).filter(track => track != null) as Track[]
+    this.queue.load(...filteredTracks)
+  }
+
+  /**
+   * Add the tracks of a playlist to the queue
+   *
+   * @private
+   * @param playlist The playlist to add the tracks of
+   * @memberof SearchPalette
+   */
+  private async addPlaylistTracks (playlist: Playlist['id']): Promise<void> {
+    if (this.sdk == null) return
+    const playlistData = await this.sdk.playlists.getPlaylist(playlist)
+    const tracks = playlistData.tracks.items.map(async track => {
+      if (this.sdk == null) return
+      return await this.sdk.tracks.get(track.track.id)
+    })
+    const filteredTracks = (await Promise.all(tracks)).filter(track => track != null) as Track[]
+    this.queue.add(...filteredTracks)
+  }
+
+  /**
+   * Load the tracks of a playlist
+   *
+   * @private
+   * @param playlist The playlist to load the tracks of
+   * @memberof SearchPalette
+   */
+  private async loadPlaylistTracks (playlist: Playlist['id']): Promise<void> {
+    if (this.sdk == null) return
+    const playlistData = await this.sdk.playlists.getPlaylist(playlist)
+    const tracks = playlistData.tracks.items.map(async track => {
+      if (this.sdk == null) return
+      return await this.sdk.tracks.get(track.track.id)
+    })
+    const filteredTracks = (await Promise.all(tracks)).filter(track => track != null) as Track[]
+    this.queue.load(...filteredTracks)
+  }
+
+  /**
+   * Handle an album
+   *
+   * @private
+   * @param album The album to handle
+   * @memberof SearchPalette
+   */
+  private handleAlbum (album: SimplifiedAlbum): void {
+    const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
+    const icon = new HTML('img').classOn('image').attr({
+      src: album.images[0].url
+    })
+    const meta = new HTML('span').text(
+        `${album.name}\n${album.artists.map(artist => artist.name).join(', ')}`
+    )
+
+    const icons = new HTML('div').classOn('icons')
+
+    const add = new HTML('button')
+      .classOn('material-symbols-sharp')
+      .text('playlist_add')
+      .appendTo(icons)
+
+    add.on('click', e => {
+      e.preventDefault()
+      e.stopPropagation()
+      this.addAlbumTracks(album.id).catch(console.error)
+    })
+
+    item.appendMany(icon, meta, icons)
+    item.appendTo(this.container)
+
+    item.on('click', () => {
+      this.loadAlbumTracks(album.id)
+        .then(async () => {
+          await this.player.start()
+          await this.hide()
+        })
+        .catch(console.error)
+    })
+  }
+
+  /**
+   * Handle a playlist
+   *
+   * @private
+   * @param playlist The playlist to handle
+   * @memberof SearchPalette
+   */
+  private handlePlaylist (playlist: Playlist): void {
+    const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
+    const icon = new HTML('img').classOn('image').attr({
+      src: playlist.images[0].url
+    })
+    const meta = new HTML('span').text(
+        `${playlist.name}\n${playlist.owner.display_name}`
+    )
+
+    const icons = new HTML('div').classOn('icons')
+
+    const add = new HTML('button')
+      .classOn('material-symbols-sharp')
+      .text('playlist_add')
+      .appendTo(icons)
+
+    add.on('click', e => {
+      e.preventDefault()
+      e.stopPropagation()
+      this.addPlaylistTracks(playlist.id).catch(console.error)
+    })
+
+    item.appendMany(icon, meta, icons)
+    item.appendTo(this.container)
+
+    item.on('click', () => {
+      this.loadPlaylistTracks(playlist.id)
+        .then(async () => {
+          await this.player.start()
+          await this.hide()
+        })
+        .catch(console.error)
+    })
+  }
+
+  /**
+   * Handle a cached track
+   *
+   * @private
+   * @param key The key of the cached track
+   * @memberof SearchPalette
+   */
+  private async handleCachedTrack (key: string): Promise<void> {
+    const data: CachedData | null = await this.localForage.getItem(key)
+    if (data == null || (data.image == null || data.track == null || data.track.name == null || data.track.artists == null)) return
+
+    const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
+    const icon = new HTML('img').classOn('image').attr({ src: data.image })
+    const meta = new HTML('span').text(
+          `${data.track.name}\n${data.track.artists
+            .map(artist => artist.name)
+            .join(', ')}`
+    )
+    const icons = new HTML('div').classOn('icons')
+
+    const add = new HTML('button')
+      .classOn('material-symbols-sharp')
+      .text('playlist_add')
+      .appendTo(icons)
+
+    const remove = new HTML('button')
+      .classOn('material-symbols-sharp')
+      .text('delete')
+      .appendTo(icons)
+
+    remove.on('click', e => {
+      e.preventDefault()
+      e.stopPropagation()
+      this.localForage.removeItem(key).catch(console.error)
+      item.cleanup()
+    })
+
+    add.on('click', e => {
+      e.preventDefault()
+      e.stopPropagation()
+      this.queue.add(data.track)
+    })
+
+    item.appendMany(icon, meta, icons)
+    item.appendTo(this.container)
+
+    item.on('click', () => {
+      this.queue.load(data.track)
+      this.player.start().catch(console.error)
+      this.hide()
+    })
+  }
+
+  /**
+   * Render the search results
+   *
+   * @private
+   * @param results The search results to render
+   * @memberof SearchPalette
+   */
+  private render (results: SearchResults<['track', 'album', 'playlist']>): void {
+    // Clear the container
     this.container.html('')
+
+    // Append the tracks
     this.container.append(new HTML('div').id('tracks'))
+    if (this.sdk == null || results.tracks == null) return
     results.tracks.items.forEach(track => {
       const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
       const icon = new HTML('img').classOn('image').attr({
@@ -76,163 +316,55 @@ class SearchPalette {
       add.on('click', e => {
         e.preventDefault()
         e.stopPropagation()
-        this.player.add(track)
+        this.queue.add(track)
       })
 
       item.appendMany(icon, meta, icons)
       item.appendTo(this.container)
 
       item.on('click', () => {
-        this.player.reset()
-        this.player.add(track)
-        this.player.start()
+        this.queue.load(track)
+        this.player.start().catch(console.error)
         this.hide()
       })
     })
 
+    // Append the albums
     this.container.append(new HTML('div').id('albums'))
-    results.albums.items.forEach(album => {
-      const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
-      const icon = new HTML('img').classOn('image').attr({
-        src: album.images[0].url
-      })
-      const meta = new HTML('span').text(
-        `${album.name}\n${album.artists.map(artist => artist.name).join(', ')}`
-      )
-
-      const icons = new HTML('div').classOn('icons')
-
-      const add = new HTML('button')
-        .classOn('material-symbols-sharp')
-        .text('playlist_add')
-        .appendTo(icons)
-
-      add.on('click', async e => {
-        e.preventDefault()
-        e.stopPropagation()
-        await this.player.load(
-          (
-            await this.sdk!.albums.get(album.id)
-          ).tracks.items.map(track => track.id)
-        )
-      })
-
-      item.appendMany(icon, meta, icons)
-      item.appendTo(this.container)
-
-      item.on('click', async () => {
-        this.player.reset()
-        await this.player.load(
-          (
-            await this.sdk!.albums.get(album.id)
-          ).tracks.items.map(track => track.id)
-        )
-        this.player.start()
-        this.hide()
-      })
+    results.albums.items.forEach((album) => {
+      this.handleAlbum(album)
     })
 
+    // Append the playlists
     this.container.append(new HTML('div').id('playlists'))
-    results.playlists.items.forEach(playlist => {
-      const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
-      const icon = new HTML('img').classOn('image').attr({
-        src: playlist.images[0].url
-      })
-      const meta = new HTML('span').text(
-        `${playlist.name}\n${playlist.owner.display_name}`
-      )
-
-      const icons = new HTML('div').classOn('icons')
-
-      const add = new HTML('button')
-        .classOn('material-symbols-sharp')
-        .text('playlist_add')
-        .appendTo(icons)
-
-      add.on('click', async e => {
-        e.preventDefault()
-        e.stopPropagation()
-        await this.player.load(
-          (
-            await this.sdk!.playlists.getPlaylist(playlist.id)
-          ).tracks.items.map(track => track.track.id)
-        )
-      })
-
-      item.appendMany(icon, meta, icons)
-      item.appendTo(this.container)
-
-      item.on('click', async () => {
-        this.player.reset()
-        await this.player.load(
-          (
-            await this.sdk!.playlists.getPlaylist(playlist.id)
-          ).tracks.items.map(track => track.track.id)
-        )
-        this.player.start()
-        this.hide()
-      })
+    results.playlists.items.forEach((playlist) => {
+      this.handlePlaylist(playlist as Playlist)
     })
   }
 
-  private renderCached () {
+  /**
+   * Render the cached data
+   *
+   * @private
+   * @memberof SearchPalette
+   */
+  private renderCached (): void {
     this.container.html('')
     this.container.append(new HTML('div').id('tracks'))
     this.localForage.keys().then(keys => {
-      keys.forEach(async key => {
-        const data: CachedData | null = await this.localForage.getItem(key)
-        if (data == null) return
-        if (data.image == null) return
-        if (data.track == null) return
-        if (data.track.name == null) return
-        if (data.track.artists == null) return
-
-        const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
-        const icon = new HTML('img').classOn('image').attr({ src: data.image })
-        const meta = new HTML('span').text(
-          `${data.track.name}\n${data.track.artists
-            .map(artist => artist.name)
-            .join(', ')}`
-        )
-        const icons = new HTML('div').classOn('icons')
-
-        const add = new HTML('button')
-          .classOn('material-symbols-sharp')
-          .text('playlist_add')
-          .appendTo(icons)
-
-        const remove = new HTML('button')
-          .classOn('material-symbols-sharp')
-          .text('delete')
-          .appendTo(icons)
-
-        remove.on('click', e => {
-          e.preventDefault()
-          e.stopPropagation()
-          this.localForage.removeItem(key)
-          item.cleanup()
-        })
-
-        add.on('click', e => {
-          e.preventDefault()
-          e.stopPropagation()
-          this.player.add(data.track)
-        })
-
-        item.appendMany(icon, meta, icons)
-        item.appendTo(this.container)
-
-        item.on('click', () => {
-          this.player.reset()
-          this.player.add(data.track)
-          this.player.start()
-          this.hide()
-        })
+      keys.forEach(key => {
+        this.handleCachedTrack(key).catch(console.error)
       })
-    })
+    }).catch(console.error)
   }
 
-  private registerEvents () {
+  /**
+   * Register the events
+   *
+   * @private
+   * @memberof SearchPalette
+   */
+  private registerEvents (): void {
     this.close.on('click', () => this.hide())
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape') {
@@ -245,7 +377,6 @@ class SearchPalette {
       }
       event.preventDefault()
       this.toggle()
-      return
     })
 
     this.input.on(
@@ -268,15 +399,30 @@ class SearchPalette {
     )
   }
 
-  show () {
+  /**
+   * Show the search palette
+   *
+   * @memberof SearchPalette
+   */
+  show (): void {
     this.element.classOn('show')
   }
 
-  hide () {
+  /**
+   * Hide the search palette
+   *
+   * @memberof SearchPalette
+   */
+  hide (): void {
     this.element.classOff('show')
   }
 
-  toggle () {
+  /**
+   * Toggle the search palette
+   *
+   * @memberof SearchPalette
+   */
+  toggle (): void {
     this.element.class('show')
   }
 }

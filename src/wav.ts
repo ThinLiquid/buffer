@@ -1,6 +1,4 @@
 class WAV {
-  constructor () {}
-
   audioBufferToBlob (buffer: AudioBuffer): Blob {
     const [left, right] = [buffer.getChannelData(0), buffer.getChannelData(1)]
 
@@ -22,8 +20,8 @@ class WAV {
 
   getWavBytes (
     buffer: ArrayBufferLike,
-    options: { isFloat: boolean; numChannels: number; sampleRate: number }
-  ) {
+    options: { isFloat: boolean, numChannels: number, sampleRate: number }
+  ): Uint8Array {
     const type = options.isFloat ? Float32Array : Uint16Array
     const numFrames = buffer.byteLength / type.BYTES_PER_ELEMENT
 
@@ -46,12 +44,12 @@ class WAV {
     numChannels: number
     sampleRate: number
     isFloat: any
-  }) {
+  }): Uint8Array {
     const { numFrames } = options
-    const numChannels = options.numChannels || 2
-    const sampleRate = options.sampleRate || 44100
-    const bytesPerSample = options.isFloat ? 4 : 2
-    const format = options.isFloat ? 3 : 1
+    const numChannels = options.numChannels !== undefined ? options.numChannels : 2
+    const sampleRate = options.sampleRate !== 0 && !isNaN(options.sampleRate) ? options.sampleRate : 44100
+    const bytesPerSample = options.isFloat === true ? 4 : 2
+    const format = options.isFloat === true ? 3 : 1
 
     const blockAlign = numChannels * bytesPerSample
     const byteRate = sampleRate * blockAlign
@@ -62,19 +60,19 @@ class WAV {
 
     let p = 0
 
-    function writeString (s: string) {
+    function writeString (s: string): void {
       for (let i = 0; i < s.length; i++) {
         dv.setUint8(p + i, s.charCodeAt(i))
       }
       p += s.length
     }
 
-    function writeUint32 (d: number) {
+    function writeUint32 (d: number): void {
       dv.setUint32(p, d, true)
       p += 4
     }
 
-    function writeUint16 (d: number) {
+    function writeUint16 (d: number): void {
       dv.setUint16(p, d, true)
       p += 2
     }

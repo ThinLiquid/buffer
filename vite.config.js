@@ -1,5 +1,6 @@
-import { defineConfig } from "vite";
+import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: '/buffer',
@@ -8,6 +9,14 @@ export default defineConfig({
     sourcemap: true
   },
   plugins: [
-    nodePolyfills(),
-  ],
+    VitePWA({
+      workbox: {
+        globPatterns: ['**/*']
+      },
+      includeAssets: [
+        '**/*'
+      ]
+    }),
+    nodePolyfills()
+  ]
 })

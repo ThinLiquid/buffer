@@ -12,4 +12,20 @@ export interface CachedData {
 
 export type PlayerState = 'playing' | 'paused' | 'stopped' | 'loading' | 'error'
 
-export type PlayerEvent = 'trackchange' | 'statechange' | 'queuechange'
+export type PlayerEvent = 'trackchange' | 'statechange' | 'metadatachange'
+export type QueueEvent = 'queuechange'
+
+export interface TrackWithUUID extends Track {
+  _id: string
+}
+
+export interface LyricsResponse {
+  id: number
+  trackName: string
+  artistName: string
+  albumName: string
+  duration: number
+  instrumental: boolean
+  plainLyrics: string
+  syncedLyrics: string
+}

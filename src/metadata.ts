@@ -5,31 +5,44 @@ import Player from './player'
 import { getPalette } from 'get-palette'
 import { SpotifyApi } from '@spotify/web-api-ts-sdk'
 import SearchPalette from './searchpal'
-import QueuePalette from './queue'
+import QueuePalette from './queuepal'
+import Queue from './queue'
 
 class Metadata {
-  private container: HTML
-  private image: HTML
-  private meta: HTML
-  private text: HTML
-  private icons: HTML
+  private readonly container: HTML
+  private readonly image: HTML
+  private readonly meta: HTML
+  private readonly text: HTML
+  private readonly icons: HTML
 
-  private prevTrack: HTML
-  private playPause: HTML
-  private nextTrack: HTML
-  private like: HTML
+  private readonly prevTrack: HTML
+  private readonly playPause: HTML
+  private readonly nextTrack: HTML
+  private readonly like: HTML
 
-  private options: HTML
-  private menu: HTML
-  private queue: HTML
+  private readonly options: HTML
+  private readonly menu: HTML
+  private readonly queuebtn: HTML
 
+  /**
+   * Create a new metadata instance
+   *
+   * @param sdk The Spotify API instance
+   * @param player The player instance
+   * @param color The color library instance
+   * @param palette The search palette instance
+   * @param queuePalette The queue palette instance
+   * @param queue The queue instance
+   */
   constructor (
     private readonly sdk: SpotifyApi | null,
     private readonly player: Player,
     private readonly color: Color,
     private readonly palette: SearchPalette,
-    private readonly queuePalette: QueuePalette
+    private readonly queuePalette: QueuePalette,
+    private readonly queue: Queue
   ) {
+    // Initialize the elements
     this.container = new HTML('div').classOn('meta')
     this.image = new HTML('img')
     this.meta = new HTML('div')
@@ -57,19 +70,33 @@ class Metadata {
     this.menu = new HTML('button')
       .classOn('material-symbols-sharp')
       .text('playlist_play')
-    this.queue = new HTML('button')
+    this.queuebtn = new HTML('button')
       .classOn('material-symbols-sharp')
       .text('queue_music')
 
+    // Initialize the metadata
     this.init()
   }
 
-  init () {
+  /**
+   * Initialize the metadata
+   *
+   * @private
+   * @memberof Metadata
+   */
+  private init (): void {
     this.render()
     this.registerEvents()
   }
 
-  render () {
+  /**
+   * Render the metadata
+   *
+   * @private
+   * @memberof Metadata
+   */
+  private render (): void {
+    // Append the elements to the body
     this.container.appendTo(document.body)
     this.image.appendTo(this.container)
     this.meta.appendTo(this.container)
@@ -79,29 +106,42 @@ class Metadata {
     this.prevTrack.appendTo(this.icons)
     this.playPause.appendTo(this.icons)
     this.nextTrack.appendTo(this.icons)
-    if (this.sdk) this.like.appendTo(this.icons)
+    if (this.sdk != null) this.like.appendTo(this.icons) // Only show the like button if the SDK is available
 
     this.options.appendTo(document.body)
     this.menu.appendTo(this.options)
-    this.queue.appendTo(this.options)
+    this.queuebtn.appendTo(this.options)
   }
 
-  registerEvents () {
-    this.player.audio.addEventListener('loadedmetadata', async () => {
-      const { metadata } = navigator.mediaSession
-      this.setMetadata(metadata)
+  /**
+   * Register the events
+   *
+   * @private
+   * @memberof Metadata
+   */
+  private registerEvents (): void {
+    // Set the metadata when the metadata changes
+    this.player.on('metadatachange', () => {
+      this.setMetadata().catch(console.error)
     })
 
-    if (this.sdk) {
-      this.player.on('trackchange', async () => {
-        const out: boolean[] = await this.sdk!.makeRequest(
-          'GET',
-          `me/tracks/contains?ids=${this.player.currentTrack!.id}`
-        )
-        this.like.text(out[0] ? 'done' : 'add')
+    // Check if the track is liked
+    if (this.sdk != null) {
+      this.player.on('trackchange', () => {
+        if (this.sdk != null) {
+          this.sdk.makeRequest(
+            'GET',
+            `me/tracks/contains?ids=${this.queue.currentTrack.id}`
+          )
+            .then((data) => {
+              this.like.text((data as boolean[])[0] ? 'done' : 'add')
+            })
+            .catch(console.error)
+        }
       })
     }
 
+    // Register the events for the buttons
     this.player.audio.addEventListener('play', () => {
       this.playPause.text('pause')
     })
@@ -114,6 +154,7 @@ class Metadata {
       this.playPause.text('play_arrow')
     })
 
+    // Update the progress bar
     this.player.audio.addEventListener('timeupdate', () => {
       this.container.elm.style.setProperty(
         '--progress',
@@ -123,59 +164,80 @@ class Metadata {
       )
     })
 
+    // Register the click events
     this.playPause.on('click', () => {
       if (this.player.state === 'playing') {
-        this.player.setState('paused')
+        this.player.setState('paused').catch(console.error)
       } else {
-        this.player.setState('playing')
+        this.player.setState('playing').catch(console.error)
       }
     })
 
+    // Register the click events for the buttons
     this.prevTrack.on('click', () => {
-      this.player.prev()
+      this.player.prev().catch(console.error)
     })
 
+    // Register the click events for the buttons
     this.nextTrack.on('click', () => {
-      this.player.next()
+      this.player.next().catch(console.error)
     })
 
-    if (this.sdk) {
-      this.like.on('click', async () => {
-        if (!this.player.currentTrack) return
-        if (this.like.getText() === 'add') {
-          await this.sdk!.makeRequest('PUT', 'me/tracks', {
-            ids: [this.player.currentTrack.id]
-          })
-          this.like.text('done')
-        } else {
-          await this.sdk!.makeRequest('DELETE', 'me/tracks', {
-            ids: [this.player.currentTrack.id]
-          })
-          this.like.text('add')
+    // Register the click events for the like button
+    if (this.sdk != null) {
+      this.like.on('click', () => {
+        if (this.sdk != null) {
+          if (this.queue.currentTrack == null) return
+          if (this.like.getText() === 'add') {
+            this.sdk.makeRequest('PUT', 'me/tracks', {
+              ids: [this.queue.currentTrack.id]
+            }).catch(console.error)
+            this.like.text('done')
+          } else {
+            this.sdk.makeRequest('DELETE', 'me/tracks', {
+              ids: [this.queue.currentTrack.id]
+            }).catch(console.error)
+            this.like.text('add')
+          }
         }
       })
     }
 
+    // Register the click events for the sidebar
     this.menu.on('click', () => {
       this.palette.toggle()
     })
 
-    this.queue.on('click', () => {
+    this.queuebtn.on('click', () => {
       this.queuePalette.toggle()
     })
   }
 
-  private async setMetadata (metadata: MediaMetadata | null) {
-    const color = (await getPalette(metadata?.artwork[0].src!))[3]
+  /**
+   * Set the metadata
+   *
+   * @private
+   * @memberof Metadata
+   */
+  private async setMetadata (): Promise<void> {
+    // Check if the player is playing
+    if (this.player.metadata == null) {
+      this.text.text('Not playing')
+      return
+    }
+
+    // Set the accent color
+    const color = (await getPalette(this.player.metadata.artwork[0].src))[3]
     document.body.style.setProperty(
       '--accent',
       this.color.adjustContrastColor(`rgb(${color.join(',')})`)
     )
     document.body.style.setProperty('--on-accent', 'black')
 
-    this.image.attr({ src: metadata?.artwork[0].src })
+    // Set the metadata
+    this.image.attr({ src: this.player.metadata?.artwork[0].src })
     this.text.text(
-      `${metadata?.title}\n${metadata?.artist}\n${metadata?.album}`
+      `${this.player.metadata?.title}\n${this.player.metadata.artist}\n${this.player.metadata.album}`
     )
   }
 }

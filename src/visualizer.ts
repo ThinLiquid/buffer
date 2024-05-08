@@ -5,6 +5,11 @@ class Visualizer {
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
 
+  /**
+   * Create a new visualizer instance
+   *
+   * @param player The player instance
+   */
   constructor (private readonly player: Player) {
     this.canvas = new HTML('canvas').styleJs({
       background: 'transparent',
@@ -13,31 +18,49 @@ class Visualizer {
       left: '0',
       zIndex: '0'
     }).elm as HTMLCanvasElement
-    this.ctx = this.canvas.getContext('2d')!
+    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
     this.init()
   }
 
-  init () {
+  /**
+   * Initialize the visualizer
+   *
+   * @private
+   * @memberof Visualizer
+   */
+  private init (): void {
     this.render()
     this.registerEvents()
     this.renderCanvas()
   }
 
-  render () {
+  /**
+   * Render the canvas
+   *
+   * @private
+   * @memberof Visualizer
+   */
+  private render (): void {
     document.body.appendChild(this.canvas)
     this.canvas.width = window.innerWidth
     this.canvas.height = window.innerHeight
   }
 
-  renderCanvas () {
-    const audioSource = this.player.audioCtx.createMediaElementSource(
-      this.player.audio
-    )
+  /**
+   * Render the canvas
+   *
+   * @private
+   * @memberof Visualizer
+   */
+  private renderCanvas (): void {
+    // Create the audio source and analyser
+    const audioSource = this.player.audioCtx.createMediaElementSource(this.player.audio)
     const analyser = this.player.audioCtx.createAnalyser()
     audioSource.connect(analyser)
     analyser.connect(this.player.audioCtx.destination)
     analyser.fftSize = 256
 
+    // Create the buffer and data array
     const bufferLength = analyser.frequencyBinCount
     const dataArray = new Uint8Array(bufferLength)
 
@@ -45,15 +68,21 @@ class Visualizer {
     let lineHeight
 
     const animate = (): void => {
+      // Get the canvas width and height
       const canvasWidth = this.canvas.width
       const canvasHeight = this.canvas.height
+
+      // Calculate the line gap
       const lineGap = canvasWidth / bufferLength
 
+      // Clear the canvas if the player is not playing (performance)
       if (this.player.state !== 'playing') return
       this.ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
+      // Get the frequency data
       analyser.getByteFrequencyData(dataArray)
 
+      // Draw the visualizer
       this.ctx.lineWidth = 1
       this.ctx.strokeStyle = document.body.style.getPropertyValue('--accent')
       this.ctx.beginPath()
@@ -75,8 +104,8 @@ class Visualizer {
       this.ctx.stroke()
     }
 
-    // Use requestAnimationFrame outside the function
-    function animationLoop (): void {
+    // Animation loop
+    const animationLoop = (): void => {
       animate()
       requestAnimationFrame(animationLoop)
     }
@@ -84,7 +113,13 @@ class Visualizer {
     animationLoop()
   }
 
-  private registerEvents () {
+  /**
+   * Register the events
+   *
+   * @private
+   * @memberof Visualizer
+   */
+  private registerEvents (): void {
     window.addEventListener('resize', () => {
       this.canvas.width = window.innerWidth
       this.canvas.height = window.innerHeight

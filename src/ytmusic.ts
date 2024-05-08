@@ -4,11 +4,15 @@ class YTMusic {
   instance: string
   constructor () {
     this.instance = 'https://pipedapi.reallyaweso.me'
-    this.init()
   }
 
-  private async init () {}
-
+  /**
+   * Search for songs
+   *
+   * @param query The query to search for
+   * @returns The search results
+   * @memberof YTMusic
+   */
   async searchSongs (
     query: string
   ): Promise<SearchResults<SearchVideo>['items']> {
@@ -21,9 +25,16 @@ class YTMusic {
     return data.items
   }
 
-  getVideo (videoId: string): Promise<Video> {
-    return fetch(`${this.instance}/streams/${videoId}`)
-      .then(response => response.json())
+  /**
+   * Get a video
+   *
+   * @param videoId The video ID to get
+   * @returns The video
+   * @memberof YTMusic
+   */
+  async getVideo (videoId: string): Promise<Video> {
+    return await fetch(`${this.instance}/streams/${videoId}`)
+      .then(async response => await response.json())
       .then(data => data)
   }
 }

@@ -9,21 +9,20 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
     "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@types/audiobuffer-to-wav": "^1.0.4",
     "@types/lrc-parser": "^1.0.2",
     "@types/throttle-debounce": "^5.0.2",
     "@types/uuid": "^9.0.8",
-    "standardts": "^1.0.0",
+    "ts-standard": "^12.0.2",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "vite-plugin-node-polyfills": "^0.21.0",
+    "vite-plugin-pwa": "^0.20.0"
   },
   "dependencies": {
     "@datkat21/html": "^1.1.6",
     "@spotify/web-api-ts-sdk": "^1.2.0",
-    "audiobuffer-to-blob": "^1.0.2",
-    "audiobuffer-to-wav": "^1.0.0",
     "eruda": "^3.0.1",
     "get-palette": "^0.1.2",
     "localforage": "^1.10.0",
@@ -31,10 +30,6 @@
     "material-symbols": "^0.17.4",
     "sass": "^1.76.0",
     "throttle-debounce": "^5.0.0",
-    "uuid": "^9.0.1",
-    "vite-plugin-legacy": "^2.1.0",
-    "vite-plugin-node-polyfills": "^0.21.0",
-    "webm-to-wav-converter": "^1.1.0",
-    "ytmusic-api": "^5.2.1"
+    "uuid": "^9.0.1"
   }
 }
