@@ -5,6 +5,7 @@ import HTML from '@datkat21/html'
 import { SpotifyApi } from '@spotify/web-api-ts-sdk'
 import localforage from 'localforage'
 import { registerSW } from 'virtual:pwa-register'
+import eruda from 'eruda'
 
 import SearchPalette from './searchpal'
 import Player from './player'
@@ -14,6 +15,8 @@ import Color from './color'
 import Lyrics from './lyrics'
 import QueuePalette from './queuepal'
 import Queue from './queue'
+
+eruda.init()
 
 const updateSW = registerSW({
   onNeedRefresh () {
@@ -29,11 +32,6 @@ await localforage.setDriver([
   localforage.WEBSQL,
   localforage.LOCALSTORAGE
 ])
-
-if (true) {
-  const { default: eruda } = await import('eruda')
-  eruda.init()
-}
 
 const auth = (): SpotifyApi => SpotifyApi.withUserAuthorization(
   import.meta.env.VITE_SPOTIFY_CLIENT_ID,
