@@ -17,10 +17,11 @@ import Queue from './queue'
 
 const updateSW = registerSW({
   onOfflineReady () {
-    console.log('offline ready')
+    alert('offline ready')
   }
 })
-await updateSW()
+
+window.onload = async () => { await updateSW() }
 
 // Set localForage drivers
 await localforage.setDriver([
@@ -29,7 +30,7 @@ await localforage.setDriver([
   localforage.LOCALSTORAGE
 ])
 
-if (import.meta.env.DEV || true) {
+if (true) {
   const { default: eruda } = await import('eruda')
   eruda.init()
 }
