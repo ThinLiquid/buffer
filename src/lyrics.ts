@@ -163,11 +163,11 @@ class Lyrics {
       this.next.classOn('appear')
 
       this.next.text(
-        nextLyricText.trim() === '' ? DEFAULT_TEXT : prevLyricText
+        nextLyricText.trim() === '' ? DEFAULT_TEXT : nextLyricText
       )
       this.current.text(lyric.text.trim() === '' ? DEFAULT_TEXT : lyric.text)
       this.prev.text(
-        prevLyricText.trim() === '' ? DEFAULT_TEXT : nextLyricText
+        prevLyricText.trim() === '' ? DEFAULT_TEXT : prevLyricText
       )
 
       index++
