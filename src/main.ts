@@ -16,8 +16,8 @@ import QueuePalette from './queuepal'
 import Queue from './queue'
 
 const updateSW = registerSW({
-  onOfflineReady () {
-    alert('offline ready')
+  onNeedRefresh () {
+    updateSW(true).catch(e => console.error(e))
   }
 })
 
