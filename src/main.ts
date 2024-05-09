@@ -29,7 +29,7 @@ await localforage.setDriver([
   localforage.LOCALSTORAGE
 ])
 
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV || true) {
   const { default: eruda } = await import('eruda')
   eruda.init()
 }
