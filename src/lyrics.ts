@@ -40,6 +40,8 @@ class Lyrics {
     return await fetch(
       `https://lrclib.net/api/get?track_name=${encodeURIComponent(
         track.name
+      )}&album_name=${encodeURIComponent(
+        track.album.name
       )}&artist_name=${encodeURIComponent(track.artists[0].name)}&duration=${
         track.duration_ms / 1000
       }`
