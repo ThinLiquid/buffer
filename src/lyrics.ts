@@ -179,16 +179,17 @@ class Lyrics {
       this.prev.text(prevLyricText)
       this.next.text('')
       this.player.audio.ontimeupdate = null
-
-      this.player.audio.ontimeupdate = () => {
-        if (
-          (this.queue.currentTrack as any)._id !==
-          (this.currentTrack as any)._id
-        ) { this.player.audio.ontimeupdate = null }
-        updateLyrics().catch(e => e)
-      }
     }
+
     updateLyrics().catch(e => e)
+
+    this.player.audio.ontimeupdate = () => {
+      if (
+        (this.queue.currentTrack as any)._id !==
+        (this.currentTrack as any)._id
+      ) { this.player.audio.ontimeupdate = null }
+      updateLyrics().catch(e => e)
+    }
   }
 }
 
