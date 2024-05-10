@@ -181,8 +181,6 @@ class Lyrics {
       this.player.audio.ontimeupdate = null
     }
 
-    updateLyrics().catch(e => e)
-
     this.player.audio.ontimeupdate = () => {
       if (
         (this.queue.currentTrack as any)._id !==
