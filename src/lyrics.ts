@@ -129,7 +129,7 @@ class Lyrics {
       this.currentTrack = this.queue.currentTrack
       let index: number = lyricsData.findIndex(
         lyric =>
-          this.player.audio.currentTime >= lyric.start - LYRIC_OFFSET &&
+          this.player.audio.currentTime >= (lyric.start ?? 0) - LYRIC_OFFSET &&
           this.player.audio.currentTime <= lyric.end - LYRIC_OFFSET
       )
 
@@ -137,7 +137,7 @@ class Lyrics {
 
       if (
         !(
-          this.player.audio.currentTime >= lyric.start - LYRIC_OFFSET &&
+          this.player.audio.currentTime >= (lyric.start ?? 0) - LYRIC_OFFSET &&
           this.player.audio.currentTime <= lyric.end - LYRIC_OFFSET &&
           lyric.id !== previousLyricId
         )
@@ -179,15 +179,16 @@ class Lyrics {
       this.prev.text(prevLyricText)
       this.next.text('')
       this.player.audio.ontimeupdate = null
-    }
 
-    this.player.audio.ontimeupdate = () => {
-      if (
-        (this.queue.currentTrack as any)._id !==
-        (this.currentTrack as any)._id
-      ) { this.player.audio.ontimeupdate = null }
-      updateLyrics().catch(e => e)
+      this.player.audio.ontimeupdate = () => {
+        if (
+          (this.queue.currentTrack as any)._id !==
+          (this.currentTrack as any)._id
+        ) { this.player.audio.ontimeupdate = null }
+        updateLyrics().catch(e => e)
+      }
     }
+    updateLyrics().catch(e => e)
   }
 }
 
