@@ -104,6 +104,7 @@ class Lyrics {
    * @memberof Lyrics
    */
   private async handleLyrics (): Promise<void> {
+    this.player.audio.currentTime = 0
     const lyrics = await this.getLyrics(this.queue.currentTrack)
     if (lyrics?.syncedLyrics == null) {
       this.handleNoLyrics()
