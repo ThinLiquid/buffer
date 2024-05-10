@@ -129,7 +129,7 @@ class Lyrics {
       this.currentTrack = this.queue.currentTrack
       let index: number = lyricsData.findIndex(
         lyric =>
-          this.player.audio.currentTime >= (lyric.start ?? 0) - LYRIC_OFFSET &&
+          this.player.audio.currentTime >= lyric.start - LYRIC_OFFSET &&
           this.player.audio.currentTime <= lyric.end - LYRIC_OFFSET
       )
 
@@ -137,7 +137,7 @@ class Lyrics {
 
       if (
         !(
-          this.player.audio.currentTime >= (lyric.start ?? 0) - LYRIC_OFFSET &&
+          this.player.audio.currentTime >= lyric.start - LYRIC_OFFSET &&
           this.player.audio.currentTime <= lyric.end - LYRIC_OFFSET &&
           lyric.id !== previousLyricId
         )
