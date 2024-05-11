@@ -222,7 +222,16 @@ class Player {
     const res = await fetch(url)
     const buffer = await res.arrayBuffer()
     const wav = await arrayBufferToWav(this.audioCtx, buffer)
-    return URL.createObjectURL(wav)
+    return await this.blobToDataURL(wav)
+  }
+
+  private async blobToDataURL (blob: Blob): Promise<string> {
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as any)
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
   }
 
   /**
@@ -247,7 +256,7 @@ class Player {
     buffer.getChannelData(1).set(new Float32Array(buffers.right))
 
     // Stream the audio
-    this.audio.src = URL.createObjectURL(this.wav.audioBufferToBlob(buffer))
+    this.audio.src = await this.blobToDataURL(this.wav.audioBufferToBlob(buffer))
     this.state = 'playing'
   }
 

@@ -117,7 +117,10 @@ class Visualizer {
       this.canvas.width = window.innerWidth
       this.canvas.height = window.innerHeight
     })
-    this.worker.onmessage = (event) => this.draw(event.data)
+    this.worker.onmessage = (event) => {
+      if (this.player.state !== 'playing') return
+      this.draw(event.data)
+    }
   }
 }
 
