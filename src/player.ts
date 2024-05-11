@@ -391,8 +391,8 @@ class Player {
       }
       this.queue.add(
         ...(await this.sdk.recommendations.get({
-          seed_artists: this.queue.currentTrack.artists.map(artist => artist.id),
-          seed_tracks: [this.queue.currentTrack.id],
+          seed_artists: this.queue.tracks.map(track => track.artists.map(artist => artist.id)).flat(),
+          seed_tracks: this.queue.tracks.map(track => track.id),
           limit: 1
         })).tracks
       )
