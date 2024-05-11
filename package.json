@@ -14,9 +14,11 @@
     "@types/lrc-parser": "^1.0.2",
     "@types/throttle-debounce": "^5.0.2",
     "@types/uuid": "^9.0.8",
+    "terser": "^5.31.0",
     "ts-standard": "^12.0.2",
     "typescript": "^5.2.2",
     "vite": "^5.0.8",
+    "vite-plugin-compression": "^0.5.1",
     "vite-plugin-node-polyfills": "^0.21.0",
     "vite-plugin-pwa": "^0.20.0"
   },

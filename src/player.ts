@@ -256,7 +256,9 @@ class Player {
     buffer.getChannelData(1).set(new Float32Array(buffers.right))
 
     // Stream the audio
-    this.audio.src = await this.blobToDataURL(this.wav.audioBufferToBlob(buffer))
+    this.audio.src = window.isSafari
+      ? URL.createObjectURL(this.wav.audioBufferToBlob(buffer))
+      : await this.blobToDataURL(this.wav.audioBufferToBlob(buffer))
     this.state = 'playing'
   }
 
