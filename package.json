@@ -28,6 +28,7 @@
     "localforage": "^1.10.0",
     "lrc-parser": "^1.0.1",
     "material-symbols": "^0.17.4",
+    "range-slider-input": "^2.4.4",
     "sass": "^1.76.0",
     "throttle-debounce": "^5.0.0",
     "uuid": "^9.0.1"

@@ -1,4 +1,6 @@
 import HTML from '@datkat21/html'
+import rangeSlider from 'range-slider-input'
+import 'range-slider-input/dist/style.css'
 
 import Color from './color'
 import Player from './player'
@@ -23,6 +25,8 @@ class Metadata {
   private readonly options: HTML
   private readonly menu: HTML
   private readonly queuebtn: HTML
+
+  private readonly volume: HTML
 
   /**
    * Create a new metadata instance
@@ -74,6 +78,9 @@ class Metadata {
       .classOn('material-symbols-sharp')
       .text('queue_music')
 
+    this.volume = new HTML('div')
+      .id('range-slider')
+
     // Initialize the metadata
     this.init()
   }
@@ -111,6 +118,17 @@ class Metadata {
     this.options.appendTo(document.body)
     this.menu.appendTo(this.options)
     this.queuebtn.appendTo(this.options)
+
+    this.volume.appendTo(this.options)
+    rangeSlider(this.volume.elm, {
+      value: [0, 100],
+      thumbsDisabled: [true, false],
+      rangeSlideDisabled: true,
+      orientation: 'vertical',
+      onInput: (value: number[]) => {
+        this.player.audio.volume = value[1] / 100
+      }
+    })
   }
 
   /**

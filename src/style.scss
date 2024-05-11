@@ -419,6 +419,31 @@ body {
   padding: 15px;
   flex-direction: column;
 
+  & > #range-slider {
+    height: 100px;
+    width: 5px;
+    border-radius: 0;
+    background: black;
+    margin-left: 10px;
+
+    .range-slider__thumb {
+      background: var(--accent);
+      width: 15px;
+      height: 15px;
+
+      &[data-lower] {
+        width: 5px;
+        border-radius: 0;
+        background: var(--accent);
+      }
+    }
+
+    .range-slider__range {
+      border-radius: 0px;
+      background: var(--accent);
+    }
+  }
+
   & > button {
     display: block;
     background: transparent;
