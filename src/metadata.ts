@@ -50,7 +50,8 @@ class Metadata {
   ) {
     // Initialize the elements
     this.container = new HTML('div').classOn('meta')
-    this.image = new HTML('img').attr({ src: VolumeOffIcon, alt: 'Not playing' })
+    this.image = new HTML('img')
+    this.image.attr({ src: VolumeOffIcon, alt: 'Not playing' })
     this.meta = new HTML('div')
     this.text = new HTML('div').text('Not playing')
     this.icons = new HTML('div').classOn('icons')
