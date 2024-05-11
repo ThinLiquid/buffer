@@ -406,7 +406,7 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   show (): void {
-    if (!this.opened) {
+    if (!this.opened && window.isSafari === false) {
       // Fill the search palette with cached data
       this.localForage.ready(() => this.renderCached()).catch(console.error)
     }
