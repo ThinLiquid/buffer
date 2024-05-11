@@ -1,8 +1,6 @@
 import HTML from '@datkat21/html'
 import { Album, Playlist, SearchResults, SimplifiedAlbum, SpotifyApi, Track } from '@spotify/web-api-ts-sdk'
 import Player from './player'
-import localforage from 'localforage'
-import { CachedData } from './types'
 import { throttle } from 'throttle-debounce'
 import Queue from './queue'
 
@@ -313,7 +311,7 @@ class SearchPalette {
       throttle(1000, async () => {
         const query = this.input.getValue()
         if (query === '') {
-          this.renderCached()
+          this.container.html('')
           return
         }
         if (this.sdk != null) {
