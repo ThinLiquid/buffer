@@ -22,13 +22,9 @@ declare global {
   }
 }
 
-if (
-  navigator.userAgent.includes('Safari') &&
-  !navigator.userAgent.includes('Chrome') &&
-  !navigator.userAgent.includes('Firefox')
-) {
-  window.isSafari = true
-}
+window.isSafari = !!(navigator.userAgent.includes('Safari') &&
+!navigator.userAgent.includes('Chrome') &&
+!navigator.userAgent.includes('Firefox'))
 
 eruda.init()
 
