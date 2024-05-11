@@ -49,7 +49,7 @@ if (params.has('crt')) {
 }
 if (params.has('debug')) {
   ;(function () {
-    var src = '//cdn.jsdelivr.net/npm/eruda';
+    var src = 'https://cdn.jsdelivr.net/npm/eruda';
     document.body.innerHTML += ('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
     document.body.innerHTML += ('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
   })();
