@@ -48,8 +48,12 @@ if (params.has('crt')) {
   document.body.classList.add('crt')
 }
 if (params.has('debug')) {
-  const { default: eruda } = await import('eruda')
-  eruda.init()
+  ;(function () {
+    var src = '//cdn.jsdelivr.net/npm/eruda';
+    if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') != 'true') return;
+    document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+    document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
+  })();
 }
 
 const auth = (): SpotifyApi => SpotifyApi.withUserAuthorization(
