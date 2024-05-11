@@ -18,13 +18,11 @@ class SearchPalette {
    *
    * @param sdk The Spotify API instance
    * @param player The player instance
-   * @param localForage The localForage instance
    * @param queue The queue instance
    */
   constructor (
     private readonly sdk: SpotifyApi | null,
     private readonly player: Player,
-    private readonly localForage: typeof localforage,
     private readonly queue: Queue
   ) {
     // Initialize the elements
