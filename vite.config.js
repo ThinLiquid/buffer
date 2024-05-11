@@ -6,8 +6,7 @@ import viteCompression from 'vite-plugin-compression'
 export default defineConfig({
   build: {
     target: 'ES2022',
-    sourcemap: true,
-    minify: 'terser'
+    sourcemap: true
   },
   plugins: [
     VitePWA({
@@ -18,7 +17,6 @@ export default defineConfig({
         '**/*'
       ]
     }),
-    nodePolyfills(),
-    viteCompression()
+    nodePolyfills()
   ]
 })
