@@ -9,5 +9,34 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+    <svg>
+      <filter id="pixelate" x="0%" y="0%" width="100%" height="100%">
+        <!--Thanks to Zoltan Fegyver for figuring out pixelation and producing the awesome pixelation map. -->
+        <feGaussianBlur stdDeviation="0" in="SourceGraphic" result="smoothed" />
+        <feImage width="15" height="15" xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAIAAAACDbGyAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAWSURBVAgdY1ywgOEDAwKxgJhIgFQ+AP/vCNK2s+8LAAAAAElFTkSuQmCC" result="displacement-map" />
+        <feTile in="displacement-map" result="pixelate-map" />
+        <feDisplacementMap in="smoothed" in2="pixelate-map" xChannelSelector="R" yChannelSelector="G" scale="2" result="pre-final"/>
+        <feComposite operator="in" in2="SourceGraphic"/>
+      </filter>
+      <filter id="kill">
+        <feColorMatrix type="matrix" 
+          result="red_"             
+          values="4 0 0 0 0
+                  0 0 0 0 0 
+                  0 0 0 0 0 
+                  0 0 0 1 0"/>
+        <feOffset in="red_" dx="0.1" dy="0" result="red"/>
+        <feColorMatrix type="matrix" 
+          in="SourceGraphic"             
+          result="blue_"             
+          values="0 0 0 0 0
+                  0 3 0 0 0 
+                  0 0 10 0 0 
+                  0 0 0 1 0"/>
+        <feOffset in="blue_" dx="-0.1" dy="0" result="blue"/>    
+        <feBlend mode="screen" in="red" in2="blue"/>
+    
+      </filter>
+    </svg>
   </body>
 </html>
