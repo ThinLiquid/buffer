@@ -156,7 +156,7 @@ class Metadata {
             .then((data) => {
               this.like.text((data as boolean[])[0] ? 'done' : 'add')
             })
-            .catch(console.error)
+            .catch((e) => console.error(e))
         }
       })
     }
