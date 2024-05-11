@@ -48,7 +48,7 @@ if (params.has('crt')) {
   document.body.classList.add('crt')
 }
 if (params.has('debug')) {
-  const eruda = await import('eruda')
+  const { default: eruda } = await import('eruda')
   // @ts-expect-error
   eruda.init()
 }
