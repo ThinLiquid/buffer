@@ -4,7 +4,7 @@ import { Track } from '@spotify/web-api-ts-sdk'
 import lrcParser from 'lrc-parser'
 import * as uuid from 'uuid'
 import Queue from './queue'
-import { LyricsResponse } from './types'
+import { Lyric, LyricsResponse } from './types'
 
 const LYRIC_OFFSET = 0.25
 const APPEAR_DELAY = 250
@@ -110,7 +110,7 @@ class Lyrics {
       this.handleNoLyrics()
       return
     }
-    const lyricsData = lrcParser(lyrics.syncedLyrics).scripts as any[]
+    const lyricsData = lrcParser(lyrics.syncedLyrics).scripts as unknown as Lyric[]
 
     lyricsData.forEach(lyric => {
       lyric.id = uuid.v4()
@@ -126,23 +126,23 @@ class Lyrics {
     this.current.classOn('appear')
     this.next.classOn('appear')
 
+    const isCurrentLyric = (lyric: Lyric, currentTime: number): boolean =>
+      currentTime >= (lyric.start ?? -Infinity) - LYRIC_OFFSET &&
+      currentTime <= lyric.end - LYRIC_OFFSET &&
+      lyric.id !== previousLyricId
+
     const updateLyrics = async (): Promise<void> => {
       this.currentTrack = this.queue.currentTrack
       let index: number = lyricsData.findIndex(
         lyric =>
-          this.player.audio.currentTime >= lyric.start - LYRIC_OFFSET &&
+          this.player.audio.currentTime >= (lyric.start ?? -Infinity) - LYRIC_OFFSET &&
           this.player.audio.currentTime <= lyric.end - LYRIC_OFFSET
       )
 
       const lyric = lyricsData[index]
 
-      if (
-        !(
-          this.player.audio.currentTime >= lyric.start - LYRIC_OFFSET &&
-          this.player.audio.currentTime <= lyric.end - LYRIC_OFFSET &&
-          lyric.id !== previousLyricId
-        )
-      ) {
+      // Check if index is -1, if so, return early
+      if (index === -1 || !isCurrentLyric(lyric, this.player.audio.currentTime)) {
         return
       }
 
@@ -150,6 +150,13 @@ class Lyrics {
         index === lyricsData.length - 1 ? '' : lyricsData[index + 1].text
       const prevLyricText =
         index === 0 ? DEFAULT_TEXT : lyricsData[index - 1].text
+
+      const updateText = (element: InstanceType<typeof HTML>, text: string): void => {
+        const trimmedText = text.trim()
+        if (element.getText() !== trimmedText) {
+          element.text(trimmedText ?? DEFAULT_TEXT)
+        }
+      }
 
       this.current.classOff('appear')
       this.prev.classOff('appear')
@@ -163,13 +170,9 @@ class Lyrics {
       this.current.classOn('appear')
       this.next.classOn('appear')
 
-      this.next.text(
-        nextLyricText.trim() === '' ? DEFAULT_TEXT : nextLyricText
-      )
-      this.current.text(lyric.text.trim() === '' ? DEFAULT_TEXT : lyric.text)
-      this.prev.text(
-        prevLyricText.trim() === '' ? DEFAULT_TEXT : prevLyricText
-      )
+      updateText(this.next, nextLyricText)
+      updateText(this.current, lyric.text)
+      updateText(this.prev, prevLyricText)
 
       index++
       previousLyricId = lyric.id
@@ -177,19 +180,18 @@ class Lyrics {
       if (index !== lyricsData.length) {
         return
       }
-      this.prev.text(prevLyricText)
-      this.next.text('')
+
       this.player.audio.ontimeupdate = null
     }
 
-    updateLyrics().catch(e => e)
+    requestAnimationFrame(() => { updateLyrics().catch(console.error) })
 
     this.player.audio.ontimeupdate = () => {
       if (
         (this.queue.currentTrack as any)._id !==
-        (this.currentTrack as any)._id
+    (this.currentTrack as any)._id
       ) { this.player.audio.ontimeupdate = null }
-      updateLyrics().catch(e => e)
+      requestAnimationFrame(() => { updateLyrics().catch(console.error) })
     }
   }
 }

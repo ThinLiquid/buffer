@@ -184,11 +184,7 @@ class Metadata {
 
     // Register the click events
     this.playPause.on('click', () => {
-      if (this.player.state === 'playing') {
-        this.player.setState('paused').catch(console.error)
-      } else {
-        this.player.setState('playing').catch(console.error)
-      }
+      this.player.state = this.player.state === 'playing' ? 'paused' : 'playing'
     })
 
     // Register the click events for the buttons

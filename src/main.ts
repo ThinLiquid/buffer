@@ -16,6 +16,20 @@ import Lyrics from './lyrics'
 import QueuePalette from './queuepal'
 import Queue from './queue'
 
+declare global {
+  interface Window {
+    isSafari: boolean
+  }
+}
+
+if (
+  navigator.userAgent.includes('Safari') &&
+  !navigator.userAgent.includes('Chrome') &&
+  !navigator.userAgent.includes('Firefox')
+) {
+  window.isSafari = true
+}
+
 eruda.init()
 
 const updateSW = registerSW({

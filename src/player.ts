@@ -8,12 +8,44 @@ import Queue from './queue'
 import { arrayBufferToWav } from './util'
 
 class Player {
-  private readonly yt: YTMusic
-  private readonly wav: InstanceType<typeof WAV>
+  private readonly MAX_CALLBACKS = 10
   readonly audio: InstanceType<typeof Audio>
-  readonly audioCtx: AudioContext
   metadata: MediaMetadata | null = null
-  state: PlayerState = 'stopped'
+
+  private _state: PlayerState = 'stopped'
+  get state (): PlayerState {
+    return this._state
+  }
+
+  set state (value: PlayerState) {
+    // Set the state adn emit the state change event
+    this._state = value
+    this.emit('statechange')
+
+    // Handle the state
+    switch (this._state) {
+      case 'playing':
+        if (this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume().catch(this.handleError)
+        }
+        this.audio.play().catch(this.handleError)
+        if (navigator.mediaSession.metadata !== this.metadata) {
+          navigator.mediaSession.metadata = this.metadata
+        }
+        break
+      case 'paused':
+        this.audio.pause()
+        break
+      case 'stopped':
+        this.audio.pause()
+        this.audio.currentTime = 0
+        break
+      case 'loading':
+        break
+      default:
+        break
+    }
+  }
 
   /**
    * Creates an instance of Player.
@@ -27,19 +59,36 @@ class Player {
     private readonly localForage: typeof localforage,
     private readonly queue: Queue
   ) {
-    // Initialize services/utils
-    this.yt = new YTMusic()
-    this.wav = new WAV()
-
     // Create an audio element
     this.audio = new Audio()
     this.audio.crossOrigin = 'anonymous' // Required so we can decode cross-origin audio data
 
-    // Create an audio context
-    this.audioCtx = new AudioContext()
-
     // Initialize the player
     this.init()
+  }
+
+  private _yt?: InstanceType<typeof YTMusic>
+  private get yt (): InstanceType<typeof YTMusic> {
+    if (this._yt == null) {
+      this._yt = new YTMusic()
+    }
+    return this._yt
+  }
+
+  private _wav?: InstanceType<typeof WAV>
+  private get wav (): InstanceType<typeof WAV> {
+    if (this._wav == null) {
+      this._wav = new WAV()
+    }
+    return this._wav
+  }
+
+  private _audioCtx?: InstanceType<typeof AudioContext>
+  get audioCtx (): InstanceType<typeof AudioContext> {
+    if (this._audioCtx == null) {
+      this._audioCtx = new AudioContext()
+    }
+    return this._audioCtx
   }
 
   /**
@@ -50,17 +99,24 @@ class Player {
    */
   private init (): void {
     // Workaround for Safari's autoplay policy
-    window.onclick = async () => {
+    const clickHandler = async (): Promise<void> => {
       window.onclick = null
-      await this.audioCtx.resume()
+      // Remove the event listener when it's no longer needed
+      window.removeEventListener('click', () => {
+        clickHandler().catch(this.handleError)
+      })
+      this.audioCtx.resume().catch(this.handleError)
     }
+    window.addEventListener('click', () => {
+      clickHandler().catch(this.handleError)
+    })
 
     // Register media session handlers
     navigator.mediaSession.setActionHandler('play', () => {
-      this.setState('playing').catch(console.error)
+      this.state = 'playing'
     })
     navigator.mediaSession.setActionHandler('pause', () => {
-      this.setState('paused').catch(console.error)
+      this.state = 'paused'
     })
     navigator.mediaSession.setActionHandler('seekbackward', () => {
       this.audio.currentTime -= 10
@@ -69,13 +125,13 @@ class Player {
       this.audio.currentTime += 10
     })
     navigator.mediaSession.setActionHandler('previoustrack', () => {
-      this.prev().catch(console.error)
+      this.prev().catch(this.handleError)
     })
     navigator.mediaSession.setActionHandler('nexttrack', () => {
-      this.next().catch(console.error)
+      this.next().catch(this.handleError)
     })
     navigator.mediaSession.setActionHandler('stop', () => {
-      this.setState('stopped').catch(console.error)
+      this.state = 'stopped'
     })
     navigator.mediaSession.setActionHandler('seekto', ({ seekTime }) => {
       this.audio.currentTime = seekTime ?? this.audio.currentTime
@@ -93,7 +149,7 @@ class Player {
    */
   private registerEvents (): void {
     this.audio.addEventListener('ended', () => {
-      this.next().catch(console.error)
+      this.next().catch(this.handleError)
     })
   }
 
@@ -149,7 +205,7 @@ class Player {
    */
   private async streamAudio (url: string): Promise<void> {
     this.audio.src = url
-    await this.setState('playing')
+    this.state = 'playing'
   }
 
   /**
@@ -192,7 +248,7 @@ class Player {
 
     // Stream the audio
     this.audio.src = URL.createObjectURL(this.wav.audioBufferToBlob(buffer))
-    await this.setState('playing')
+    this.state = 'playing'
   }
 
   /**
@@ -230,18 +286,17 @@ class Player {
    * @param image The image to display
    * @memberof Player
    */
-  private async play (track: Track, buffers?: CachedData['buffers'], image?: string): Promise<void> {
+  private async play (track: Track): Promise<void> {
     // Pause the audio
     this.audio.pause()
-
     this.emit('trackchange')
-
-    await this.setState('loading')
+    this.state = 'loading'
 
     // Check if the track is cached
-    if (buffers != null) {
-      await this.playFromBuffers(buffers)
-      this.registerMetadata(track, image)
+    if (localforage.getItem(track.id) != null) {
+      const cached = (await localforage.getItem(track.id)) as CachedData
+      this.registerMetadata(track, cached.image)
+      await this.playFromBuffers(cached.buffers)
       return
     }
 
@@ -249,16 +304,13 @@ class Player {
     const stream = await this.spotifyToYTMusic(track)
 
     // Check if the user is using Safari
-    const url =
-      navigator.userAgent.includes('Safari') &&
-      !navigator.userAgent.includes('Chrome') &&
-      !navigator.userAgent.includes('Firefox')
-        ? await this.safariAudioFallback(stream.url) // Fallback to WAV for Safari
-        : stream.url // Use the original stream URL
+    const url = window.isSafari
+      ? await this.safariAudioFallback(stream.url) // Fallback to WAV for Safari
+      : stream.url // Use the original stream URL
 
     // Stream the audio
-    await this.streamAudio(url)
     this.registerMetadata(track)
+    await this.streamAudio(url)
 
     // Save the track to cache
     const buffer = await this.createAudioBuffer()
@@ -317,40 +369,6 @@ class Player {
     })
   }
 
-  /**
-   * Set the player's state
-   *
-   * @param state The state to set
-   * @memberof Player
-   */
-  async setState (state: PlayerState): Promise<void> {
-    // Set the state adn emit the state change event
-    this.state = state
-    this.emit('statechange')
-
-    // Handle the state
-    switch (state) {
-      case 'playing':
-        if (this.audioCtx.state === 'suspended') {
-          await this.audioCtx.resume()
-        }
-        await this.audio.play()
-        navigator.mediaSession.metadata = this.metadata
-        break
-      case 'paused':
-        await this.audio.pause()
-        break
-      case 'stopped':
-        await this.audio.pause()
-        this.audio.currentTime = 0
-        break
-      case 'loading':
-        break
-      default:
-        break
-    }
-  }
-
   private readonly events: Record<PlayerEvent, Array<() => void>> = {
     trackchange: [],
     statechange: [],
@@ -365,7 +383,8 @@ class Player {
    * @memberof Player
    */
   private emit (event: PlayerEvent): void {
-    this.events[event]?.forEach(callback => callback())
+    // Only call the first MAX_CALLBACKS callbacks
+    this.events[event]?.slice(0, this.MAX_CALLBACKS).forEach(callback => callback())
   }
 
   /**
@@ -376,7 +395,10 @@ class Player {
    * @memberof Player
    */
   on (event: PlayerEvent, callback: () => void): void {
-    this.events[event].push(callback)
+    // Only add the callback if there are less than MAX_CALLBACKS for this event
+    if (this.events[event].length < this.MAX_CALLBACKS) {
+      this.events[event].push(callback)
+    }
   }
 
   /**
@@ -385,7 +407,7 @@ class Player {
    * @memberof Player
    */
   async next (): Promise<void> {
-    if (this.queue.index >= this.queue.tracks.length) {
+    if (this.queue.index >= this.queue.tracks.length - 1) { // Prefetch when there's only one track left
       if (this.sdk == null) {
         return
       }
@@ -419,6 +441,10 @@ class Player {
   async start (): Promise<void> {
     // Play the next track in the queue
     await this.next()
+  }
+
+  private handleError (error: any): void {
+    this.handleError(error)
   }
 }
 

@@ -5,6 +5,16 @@ class Visualizer {
   canvas: HTMLCanvasElement
   ctx: CanvasRenderingContext2D
 
+  worker: Worker
+
+  get canvasWidth (): number {
+    return this.canvas.width
+  }
+
+  get canvasHeight (): number {
+    return this.canvas.height
+  }
+
   /**
    * Create a new visualizer instance
    *
@@ -19,7 +29,26 @@ class Visualizer {
       zIndex: '0'
     }).elm as HTMLCanvasElement
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
+
+    this.worker = new Worker(new URL('./workers/calculateVisualizer.ts', import.meta.url), {
+      type: 'module'
+    })
+
     this.init()
+  }
+
+  private draw (data: Array<{ x: number, lineHeight: number }>): void {
+    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
+
+    this.ctx.lineWidth = 1
+    this.ctx.strokeStyle = document.body.style.getPropertyValue('--accent')
+    this.ctx.beginPath()
+
+    for (const { x, lineHeight } of data) {
+      this.ctx.lineTo(x, this.canvasHeight - lineHeight)
+    }
+
+    this.ctx.stroke()
   }
 
   /**
@@ -41,9 +70,9 @@ class Visualizer {
    * @memberof Visualizer
    */
   private render (): void {
-    document.body.appendChild(this.canvas)
     this.canvas.width = window.innerWidth
     this.canvas.height = window.innerHeight
+    document.body.appendChild(this.canvas)
   }
 
   /**
@@ -64,49 +93,13 @@ class Visualizer {
     const bufferLength = analyser.frequencyBinCount
     const dataArray = new Uint8Array(bufferLength)
 
-    let x = 0
-    let lineHeight
-
-    const animate = (): void => {
-      // Get the canvas width and height
-      const canvasWidth = this.canvas.width
-      const canvasHeight = this.canvas.height
-
-      // Calculate the line gap
-      const lineGap = canvasWidth / bufferLength
-
-      // Clear the canvas if the player is not playing (performance)
-      if (this.player.state !== 'playing') return
-      this.ctx.clearRect(0, 0, canvasWidth, canvasHeight)
-
+    // Animation loop
+    const animationLoop = (): void => {
       // Get the frequency data
       analyser.getByteFrequencyData(dataArray)
 
-      // Draw the visualizer
-      this.ctx.lineWidth = 1
-      this.ctx.strokeStyle = document.body.style.getPropertyValue('--accent')
-      this.ctx.beginPath()
-
-      x = 0
-      const percent = dataArray[0] / 255
-      lineHeight = (canvasHeight * percent) / 2
-      this.ctx.moveTo(x, canvasHeight - lineHeight)
-
-      for (let i = 1; i < bufferLength; i++) {
-        const percent = dataArray[i] / 255
-        lineHeight = (canvasHeight * percent) / 2
-
-        this.ctx.lineTo(x, canvasHeight - lineHeight)
-
-        x += lineGap + 2
-      }
-
-      this.ctx.stroke()
-    }
-
-    // Animation loop
-    const animationLoop = (): void => {
-      animate()
+      // Send data to the worker
+      this.worker.postMessage({ dataArray, canvasHeight: this.canvasHeight, canvasWidth: this.canvasWidth, bufferLength })
       requestAnimationFrame(animationLoop)
     }
 
@@ -124,6 +117,7 @@ class Visualizer {
       this.canvas.width = window.innerWidth
       this.canvas.height = window.innerHeight
     })
+    this.worker.onmessage = (event) => this.draw(event.data)
   }
 }
 

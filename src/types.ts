@@ -29,3 +29,10 @@ export interface LyricsResponse {
   plainLyrics: string
   syncedLyrics: string
 }
+
+export interface Lyric {
+  start?: number
+  end: number
+  text: string
+  id: string
+}
