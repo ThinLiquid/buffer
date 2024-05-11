@@ -92,7 +92,7 @@ window.onload = async () => {
   const queuePalette = new QueuePalette.default(player, queue)
 
   const SearchPalette = await import('./searchpal')
-  const palette = new SearchPalette.default(sdk, player, localforage, queue)
+  const palette = new SearchPalette.default(sdk, player, queue)
 
   const Color = await import('./color')
   const color = new Color.default()
