@@ -1,3 +1,5 @@
+/* eslint-disable new-cap */
+
 import './style.scss'
 import 'material-symbols'
 
@@ -5,16 +7,6 @@ import HTML from '@datkat21/html'
 import { SpotifyApi } from '@spotify/web-api-ts-sdk'
 import localforage from 'localforage'
 import { registerSW } from 'virtual:pwa-register'
-import eruda from 'eruda'
-
-import SearchPalette from './searchpal'
-import Player from './player'
-import Visualizer from './visualizer'
-import Metadata from './metadata'
-import Color from './color'
-import Lyrics from './lyrics'
-import QueuePalette from './queuepal'
-import Queue from './queue'
 
 declare global {
   interface Window {
@@ -22,30 +14,43 @@ declare global {
   }
 }
 
-window.isSafari = !!(navigator.userAgent.includes('Safari') &&
-!navigator.userAgent.includes('Chrome') &&
-!navigator.userAgent.includes('Firefox'))
+function checkIsSafari (): boolean {
+  return !!(navigator.userAgent.includes('Safari') &&
+  !navigator.userAgent.includes('Chrome') &&
+  !navigator.userAgent.includes('Firefox'))
+}
 
-eruda.init()
+window.isSafari = checkIsSafari()
 
 const updateSW = registerSW({
   onNeedRefresh () {
-    updateSW(true).catch(e => console.error(e))
+    updateSW(true).catch(e => {
+      console.error('Failed to update service worker:', e)
+    })
   }
 })
 
 window.onload = async () => { await updateSW() }
 
 // Set localForage drivers
-await localforage.setDriver([
-  localforage.INDEXEDDB,
-  localforage.WEBSQL,
-  localforage.LOCALSTORAGE
-])
+try {
+  await localforage.setDriver([
+    localforage.INDEXEDDB,
+    localforage.LOCALSTORAGE
+  ])
+} catch (e) {
+  console.error('Failed to set localForage driver:', e)
+  // handle error appropriately
+}
 
 const params = new URLSearchParams(window.location.search)
 if (params.has('crt')) {
   document.body.classList.add('crt')
+}
+if (params.has('debug')) {
+  const eruda = await import('eruda')
+  // @ts-expect-error
+  eruda.init()
 }
 
 const auth = (): SpotifyApi => SpotifyApi.withUserAuthorization(
@@ -69,23 +74,37 @@ window.onload = async () => {
   await sdk.currentUser.profile()
 }
 
-const queue = new Queue()
-const player = new Player(sdk, localforage, queue)
-const color = new Color()
-const palette = new SearchPalette(sdk, player, localforage, queue)
-const queuePalette = new QueuePalette(player, queue)
-// eslint-disable-next-line no-new
-new Metadata(sdk, player, color, palette, queuePalette, queue)
-// eslint-disable-next-line no-new
-new Visualizer(player)
-// eslint-disable-next-line no-new
-new Lyrics(player, queue)
+(async () => {
+  const Queue = await import('./queue')
+  const queue = new Queue.default()
 
-if (
-  navigator.userAgent.includes('Safari') &&
-  !navigator.userAgent.includes('Chrome') &&
-  !navigator.userAgent.includes('Firefox')
-) {
+  const Player = await import('./player')
+  const player = new Player.default(sdk, localforage, queue)
+
+  const Visualizer = await import('./visualizer')
+  // eslint-disable-next-line no-new
+  new Visualizer.default(player)
+
+  const Lyrics = await import('./lyrics')
+  // eslint-disable-next-line no-new
+  new Lyrics.default(player, queue)
+
+  const QueuePalette = await import('./queuepal')
+  const queuePalette = new QueuePalette.default(player, queue)
+
+  const SearchPalette = await import('./searchpal')
+  const palette = new SearchPalette.default(sdk, player, localforage, queue)
+
+  const Color = await import('./color')
+  const color = new Color.default()
+
+  const Metadata = await import('./metadata')
+  // eslint-disable-next-line no-new
+  new Metadata.default(sdk, player, color, palette, queuePalette, queue)
+
+  if (!window.isSafari) {
+    return
+  }
   const div = new HTML('div')
     .styleJs({
       display: 'flex',
@@ -119,11 +138,10 @@ if (
   }
 
   div.on('click', _)
-}
+})().catch(console.error)
 
 window.ononline = async () => {
-  if (sdk == null) return
-  await sdk.currentUser.profile()
+  if (sdk != null) return
   sdk = navigator.onLine
     ? auth()
     : null

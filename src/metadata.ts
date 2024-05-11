@@ -10,6 +10,8 @@ import SearchPalette from './searchpal'
 import QueuePalette from './queuepal'
 import Queue from './queue'
 
+import VolumeOffIcon from './assets/volume_off.svg'
+
 class Metadata {
   private readonly container: HTML
   private readonly image: HTML
@@ -48,7 +50,7 @@ class Metadata {
   ) {
     // Initialize the elements
     this.container = new HTML('div').classOn('meta')
-    this.image = new HTML('img')
+    this.image = new HTML('img').attr({ src: VolumeOffIcon, alt: 'Not playing' })
     this.meta = new HTML('div')
     this.text = new HTML('div').text('Not playing')
     this.icons = new HTML('div').classOn('icons')
@@ -237,6 +239,7 @@ class Metadata {
     // Check if the player is playing
     if (this.player.metadata == null) {
       this.text.text('Not playing')
+      this.image.attr({ src: '', alt: 'Not playing' })
       return
     }
 
@@ -249,7 +252,7 @@ class Metadata {
     document.body.style.setProperty('--on-accent', 'black')
 
     // Set the metadata
-    this.image.attr({ src: this.player.metadata?.artwork[0].src })
+    this.image.attr({ src: this.player.metadata?.artwork[0].src, alt: `${this.player.metadata.title} by ${this.player.metadata.artist}` })
     this.text.text(
       `${this.player.metadata?.title}\n${this.player.metadata.artist}\n${this.player.metadata.album}`
     )

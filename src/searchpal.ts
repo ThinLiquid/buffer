@@ -67,9 +67,6 @@ class SearchPalette {
     this.jump.appendTo(this.element)
     this.container.appendTo(this.element)
 
-    // Fill the search palette with cached data
-    await this.localForage.ready(() => this.renderCached())
-
     // Register the events
     this.registerEvents()
   }
@@ -156,7 +153,8 @@ class SearchPalette {
   private handleAlbum (album: SimplifiedAlbum): void {
     const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
     const icon = new HTML('img').classOn('image').attr({
-      src: album.images[0].url
+      src: album.images[0].url,
+      alt: `${album.name} by ${album.artists.map(artist => artist.name).join(', ')}`
     })
     const meta = new HTML('span').text(
         `${album.name}\n${album.artists.map(artist => artist.name).join(', ')}`
@@ -198,7 +196,8 @@ class SearchPalette {
   private handlePlaylist (playlist: Playlist): void {
     const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
     const icon = new HTML('img').classOn('image').attr({
-      src: playlist.images[0].url
+      src: playlist.images[0].url,
+      alt: `${playlist.name} compiled by ${playlist.owner.display_name}`
     })
     const meta = new HTML('span').text(
         `${playlist.name}\n${playlist.owner.display_name}`
@@ -242,7 +241,7 @@ class SearchPalette {
     if (data == null || (data.image == null || data.track == null || data.track.name == null || data.track.artists == null)) return
 
     const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
-    const icon = new HTML('img').classOn('image').attr({ src: data.image })
+    const icon = new HTML('img').classOn('image').attr({ src: data.image, alt: `${data.track.name} by ${data.track.artists.map(artist => artist.name).join(', ')}` })
     const meta = new HTML('span').text(
           `${data.track.name}\n${data.track.artists
             .map(artist => artist.name)
@@ -300,7 +299,8 @@ class SearchPalette {
     results.tracks.items.forEach(track => {
       const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
       const icon = new HTML('img').classOn('image').attr({
-        src: track.album.images[0].url
+        src: track.album.images[0].url,
+        alt: `${track.name} by ${track.artists.map(artist => artist.name).join(', ')}`
       })
       const meta = new HTML('span').text(
         `${track.name}\n${track.artists.map(artist => artist.name).join(', ')}`
@@ -399,12 +399,17 @@ class SearchPalette {
     )
   }
 
+  opened = false
   /**
    * Show the search palette
    *
    * @memberof SearchPalette
    */
   show (): void {
+    if (!this.opened) {
+      // Fill the search palette with cached data
+      this.localForage.ready(() => this.renderCached()).catch(console.error)
+    }
     this.element.classOn('show')
   }
 

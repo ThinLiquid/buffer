@@ -47,7 +47,7 @@ class QueuePalette {
     const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
     const icon = new HTML('img')
       .classOn('image')
-      .attr({ src: track.album.images[0].url })
+      .attr({ src: track.album.images[0].url, alt: `${track.name} by ${track.artists.map(artist => artist.name).join(', ')}` })
     const meta = new HTML('span').text(
         `${track.name}\n${track.artists.map(artist => artist.name).join(', ')}`
     )
