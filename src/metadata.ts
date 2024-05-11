@@ -142,7 +142,7 @@ class Metadata {
   private registerEvents (): void {
     // Set the metadata when the metadata changes
     this.player.on('metadatachange', () => {
-      this.setMetadata().catch(console.error)
+      this.setMetadata().catch((e) => console.error(e))
     })
 
     // Check if the track is liked
