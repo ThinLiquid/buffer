@@ -222,7 +222,7 @@ class Player {
     const res = await fetch(url)
     const buffer = await res.arrayBuffer()
     const wav = await arrayBufferToWav(this.audioCtx, buffer)
-    return await this.blobToDataURL(wav)
+    return URL.createObjectURL(wav)
   }
 
   private async blobToDataURL (blob: Blob): Promise<string> {
