@@ -35,7 +35,7 @@ window.onload = async () => { await updateSW() }
 // Set localForage drivers
 try {
   await localforage.setDriver([
-    localforage.INDEXEDDB,
+    localforage.WEBSQL,
     localforage.LOCALSTORAGE
   ])
 } catch (e) {
