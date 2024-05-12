@@ -225,15 +225,6 @@ class Player {
     return URL.createObjectURL(wav)
   }
 
-  private async blobToDataURL (blob: Blob): Promise<string> {
-    return await new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as any)
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
-  }
-
   /**
    * Play audio from buffers
    *
@@ -256,9 +247,7 @@ class Player {
     buffer.getChannelData(1).set(new Float32Array(buffers.right))
 
     // Stream the audio
-    this.audio.src = window.isSafari
-      ? URL.createObjectURL(this.wav.audioBufferToBlob(buffer))
-      : await this.blobToDataURL(this.wav.audioBufferToBlob(buffer))
+    this.audio.src = URL.createObjectURL(this.wav.audioBufferToBlob(buffer))
     this.state = 'playing'
   }
 
