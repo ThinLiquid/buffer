@@ -414,8 +414,8 @@ class Player {
       const takeRight = (arr: any[], n = 1): any[] => n === 0 ? [] : arr.slice(-n)
       this.queue.add(
         ...(await this.sdk.recommendations.get({
-          seed_artists: takeRight(this.queue.tracks.map(track => track.artists.map(artist => artist.id)).flat(), 4),
-          seed_tracks: takeRight(this.queue.tracks.map(track => track.id), 4),
+          seed_artists: takeRight(this.queue.tracks.map(track => track.artists.map(artist => artist.id)).flat(), 2),
+          seed_tracks: takeRight(this.queue.tracks.map(track => track.id), 3),
           limit: 1
         })).tracks
       )
