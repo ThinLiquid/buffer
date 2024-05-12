@@ -50,7 +50,8 @@ class Metadata {
   ) {
     // Initialize the elements
     this.container = new HTML('div').classOn('meta')
-    this.image = new HTML('img').attr({ src: VolumeOffIcon, alt: 'Not playing' })
+    this.image = new HTML('img')
+    this.image.attr({ src: VolumeOffIcon, alt: 'Not playing' })
     this.meta = new HTML('div')
     this.text = new HTML('div').text('Not playing')
     this.icons = new HTML('div').classOn('icons')
@@ -142,7 +143,7 @@ class Metadata {
   private registerEvents (): void {
     // Set the metadata when the metadata changes
     this.player.on('metadatachange', () => {
-      this.setMetadata().catch(console.error)
+      this.setMetadata().catch((e) => console.error(e))
     })
 
     // Check if the track is liked
@@ -156,7 +157,7 @@ class Metadata {
             .then((data) => {
               this.like.text((data as boolean[])[0] ? 'done' : 'add')
             })
-            .catch(console.error)
+            .catch((e) => console.error(e))
         }
       })
     }

@@ -35,7 +35,7 @@ window.onload = async () => { await updateSW() }
 // Set localForage drivers
 try {
   await localforage.setDriver([
-    localforage.INDEXEDDB,
+    localforage.WEBSQL,
     localforage.LOCALSTORAGE
   ])
 } catch (e) {
@@ -48,9 +48,11 @@ if (params.has('crt')) {
   document.body.classList.add('crt')
 }
 if (params.has('debug')) {
-  const eruda = await import('eruda')
-  // @ts-expect-error
-  eruda.init()
+  ;(function () {
+    var src = 'https://cdn.jsdelivr.net/npm/eruda';
+    document.body.innerHTML += ('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+    document.body.innerHTML += ('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
+  })();
 }
 
 const auth = (): SpotifyApi => SpotifyApi.withUserAuthorization(
@@ -93,7 +95,7 @@ window.onload = async () => {
   const queuePalette = new QueuePalette.default(player, queue)
 
   const SearchPalette = await import('./searchpal')
-  const palette = new SearchPalette.default(sdk, player, localforage, queue)
+  const palette = new SearchPalette.default(sdk, player, queue)
 
   const Color = await import('./color')
   const color = new Color.default()

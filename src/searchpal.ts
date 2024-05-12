@@ -1,8 +1,6 @@
 import HTML from '@datkat21/html'
 import { Album, Playlist, SearchResults, SimplifiedAlbum, SpotifyApi, Track } from '@spotify/web-api-ts-sdk'
 import Player from './player'
-import localforage from 'localforage'
-import { CachedData } from './types'
 import { throttle } from 'throttle-debounce'
 import Queue from './queue'
 
@@ -18,13 +16,11 @@ class SearchPalette {
    *
    * @param sdk The Spotify API instance
    * @param player The player instance
-   * @param localForage The localForage instance
    * @param queue The queue instance
    */
   constructor (
     private readonly sdk: SpotifyApi | null,
     private readonly player: Player,
-    private readonly localForage: typeof localforage,
     private readonly queue: Queue
   ) {
     // Initialize the elements
@@ -230,59 +226,6 @@ class SearchPalette {
   }
 
   /**
-   * Handle a cached track
-   *
-   * @private
-   * @param key The key of the cached track
-   * @memberof SearchPalette
-   */
-  private async handleCachedTrack (key: string): Promise<void> {
-    const data: CachedData | null = await this.localForage.getItem(key)
-    if (data == null || (data.image == null || data.track == null || data.track.name == null || data.track.artists == null)) return
-
-    const item = new HTML('div').classOn('item').attr({ tabindex: '0' })
-    const icon = new HTML('img').classOn('image').attr({ src: data.image, alt: `${data.track.name} by ${data.track.artists.map(artist => artist.name).join(', ')}` })
-    const meta = new HTML('span').text(
-          `${data.track.name}\n${data.track.artists
-            .map(artist => artist.name)
-            .join(', ')}`
-    )
-    const icons = new HTML('div').classOn('icons')
-
-    const add = new HTML('button')
-      .classOn('material-symbols-sharp')
-      .text('playlist_add')
-      .appendTo(icons)
-
-    const remove = new HTML('button')
-      .classOn('material-symbols-sharp')
-      .text('delete')
-      .appendTo(icons)
-
-    remove.on('click', e => {
-      e.preventDefault()
-      e.stopPropagation()
-      this.localForage.removeItem(key).catch(console.error)
-      item.cleanup()
-    })
-
-    add.on('click', e => {
-      e.preventDefault()
-      e.stopPropagation()
-      this.queue.add(data.track)
-    })
-
-    item.appendMany(icon, meta, icons)
-    item.appendTo(this.container)
-
-    item.on('click', () => {
-      this.queue.load(data.track)
-      this.player.start().catch(console.error)
-      this.hide()
-    })
-  }
-
-  /**
    * Render the search results
    *
    * @private
@@ -343,22 +286,6 @@ class SearchPalette {
   }
 
   /**
-   * Render the cached data
-   *
-   * @private
-   * @memberof SearchPalette
-   */
-  private renderCached (): void {
-    this.container.html('')
-    this.container.append(new HTML('div').id('tracks'))
-    this.localForage.keys().then(keys => {
-      keys.forEach(key => {
-        this.handleCachedTrack(key).catch(console.error)
-      })
-    }).catch(console.error)
-  }
-
-  /**
    * Register the events
    *
    * @private
@@ -384,7 +311,7 @@ class SearchPalette {
       throttle(1000, async () => {
         const query = this.input.getValue()
         if (query === '') {
-          this.renderCached()
+          this.container.html('')
           return
         }
         if (this.sdk != null) {
@@ -398,18 +325,13 @@ class SearchPalette {
       })
     )
   }
-
-  opened = false
+  
   /**
    * Show the search palette
    *
    * @memberof SearchPalette
    */
   show (): void {
-    if (!this.opened) {
-      // Fill the search palette with cached data
-      this.localForage.ready(() => this.renderCached()).catch(console.error)
-    }
     this.element.classOn('show')
   }
 
