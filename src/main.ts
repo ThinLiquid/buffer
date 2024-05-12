@@ -35,7 +35,7 @@ window.onload = async () => { await updateSW() }
 // Set localForage drivers
 try {
   await localforage.setDriver([
-    localforage.WEBSQL,
+    localforage.INDEXEDDB,
     localforage.LOCALSTORAGE
   ])
 } catch (e) {
@@ -49,10 +49,10 @@ if (params.has('crt')) {
 }
 if (params.has('debug')) {
   ;(function () {
-    var src = 'https://cdn.jsdelivr.net/npm/eruda';
-    document.body.innerHTML += ('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
-    document.body.innerHTML += ('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
-  })();
+    let src = 'https://cdn.jsdelivr.net/npm/eruda'
+    document.body.innerHTML += ('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>')
+    document.body.innerHTML += ('<scr' + 'ipt>eruda.init();</scr' + 'ipt>')
+  })()
 }
 
 const auth = (): SpotifyApi => SpotifyApi.withUserAuthorization(
