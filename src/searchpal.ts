@@ -325,7 +325,7 @@ class SearchPalette {
       })
     )
   }
-  
+
   /**
    * Show the search palette
    *

@@ -407,7 +407,7 @@ class Player {
    * @memberof Player
    */
   async next (): Promise<void> {
-    if (this.queue.index >= this.queue.tracks.length - 1) { // Prefetch when there's only one track left
+    if (this.queue.index >= this.queue.tracks.length) {
       if (this.sdk == null) {
         return
       }
@@ -444,7 +444,7 @@ class Player {
   }
 
   private handleError (error: any): void {
-    this.handleError(error)
+    console.error(error)
   }
 }
 

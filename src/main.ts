@@ -40,19 +40,11 @@ try {
   ])
 } catch (e) {
   console.error('Failed to set localForage driver:', e)
-  // handle error appropriately
 }
 
 const params = new URLSearchParams(window.location.search)
 if (params.has('crt')) {
   document.body.classList.add('crt')
-}
-if (params.has('debug')) {
-  ;(function () {
-    let src = 'https://cdn.jsdelivr.net/npm/eruda'
-    document.body.innerHTML += ('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>')
-    document.body.innerHTML += ('<scr' + 'ipt>eruda.init();</scr' + 'ipt>')
-  })()
 }
 
 const auth = (): SpotifyApi => SpotifyApi.withUserAuthorization(
