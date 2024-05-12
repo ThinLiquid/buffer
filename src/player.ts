@@ -304,9 +304,9 @@ class Player {
     this.state = 'loading'
 
     // Check if the track is cached
-    if (localforage.getItem(track.id) != null) {
+    if (await localforage.getItem(track.id) != null) {
       const cached = (await localforage.getItem(track.id)) as CachedData
-      this.registerMetadata(track, cached.image ?? null)
+      this.registerMetadata(track, cached.image)
       await this.playFromBuffers(cached.buffers)
       return
     }
