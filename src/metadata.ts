@@ -4,7 +4,7 @@ import 'range-slider-input/dist/style.css'
 
 import Color from './color'
 import Player from './player'
-import { getPalette } from 'get-palette'
+import { getColor } from 'get-palette'
 import { SpotifyApi } from '@spotify/web-api-ts-sdk'
 import SearchPalette from './searchpal'
 import QueuePalette from './queuepal'
@@ -270,7 +270,7 @@ class Metadata {
     }
 
     // Set the accent color
-    const color = (await getPalette(this.player.metadata.artwork[0].src))[3]
+    const color = await getColor(this.player.metadata.artwork[0].src)
     document.body.style.setProperty(
       '--accent',
       this.color.adjustContrastColor(`rgb(${color.join(',')})`)
