@@ -29,6 +29,7 @@ class Metadata {
   private readonly queuebtn: HTML
 
   private readonly volume: HTML
+  private readonly crt: HTML
 
   /**
    * Create a new metadata instance
@@ -84,6 +85,10 @@ class Metadata {
     this.volume = new HTML('div')
       .id('range-slider')
 
+    this.crt = new HTML('button')
+      .classOn('material-symbols-sharp')
+      .text('blur_on')
+
     // Initialize the metadata
     this.init()
   }
@@ -132,6 +137,8 @@ class Metadata {
         this.player.audio.volume = value[1] / 100
       }
     })
+
+    this.crt.appendTo(this.options)
   }
 
   /**
@@ -227,6 +234,10 @@ class Metadata {
 
     this.queuebtn.on('click', () => {
       this.queuePalette.toggle()
+    })
+
+    this.crt.on('click', () => {
+      new HTML(document.body).class('crt')
     })
   }
 
