@@ -172,6 +172,17 @@ class SearchPalette {
       this.addAlbumTracks(album.id).catch(console.error)
     })
 
+    const open = new HTML('button')
+      .classOn('material-symbols-sharp')
+      .text('open_in_new')
+      .appendTo(icons)
+
+    open.on('click', e => {
+      e.preventDefault()
+      e.stopPropagation()
+      window.open(album.external_urls.spotify, '_blank')
+    })
+
     item.appendMany(icon, meta, icons)
     item.appendTo(this.container)
 
@@ -215,6 +226,17 @@ class SearchPalette {
       this.addPlaylistTracks(playlist.id).catch(console.error)
     })
 
+    const open = new HTML('button')
+      .classOn('material-symbols-sharp')
+      .text('open_in_new')
+      .appendTo(icons)
+
+    open.on('click', e => {
+      e.preventDefault()
+      e.stopPropagation()
+      window.open(playlist.external_urls.spotify, '_blank')
+    })
+
     item.appendMany(icon, meta, icons)
     item.appendTo(this.container)
 
@@ -254,6 +276,17 @@ class SearchPalette {
 
       const icons = new HTML('div').classOn('icons')
 
+      const addNext = new HTML('button')
+        .classOn('material-symbols-sharp')
+        .text('playlist_play')
+        .appendTo(icons)
+
+      addNext.on('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        this.queue.addNext(track)
+      })
+
       const add = new HTML('button')
         .classOn('material-symbols-sharp')
         .text('playlist_add')
@@ -265,15 +298,15 @@ class SearchPalette {
         this.queue.add(track)
       })
 
-      const addNext = new HTML('button')
+      const open = new HTML('button')
         .classOn('material-symbols-sharp')
-        .text('playlist_play')
+        .text('open_in_new')
         .appendTo(icons)
 
-      addNext.on('click', e => {
+      open.on('click', e => {
         e.preventDefault()
         e.stopPropagation()
-        this.queue.addNext(track)
+        window.open(track.external_urls.spotify, '_blank')
       })
 
       item.appendMany(icon, meta, icons)
