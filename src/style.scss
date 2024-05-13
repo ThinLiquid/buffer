@@ -351,8 +351,8 @@ body {
     left: 125px;
     width: var(--progress);
     height: 1px;
-    background: linear-gradient(to right, var(--accent) 90%, transparent 10%);
-    transition: width 0.2s;
+    background: linear-gradient(to right, var(--accent), transparent);
+    transition: width 0.1s ease-in;
   }
 
   & > img {
