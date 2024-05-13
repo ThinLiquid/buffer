@@ -332,6 +332,8 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   show (): void {
+    this.input.elm.focus()
+    this.element.style({ display: 'none' })
     this.element.classOn('show')
   }
 
@@ -341,7 +343,11 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   hide (): void {
+    this.input.elm.blur()
     this.element.classOff('show')
+    setTimeout(() => {
+      this.element.style({ display: 'none' })
+    }, 200)
   }
 
   /**
