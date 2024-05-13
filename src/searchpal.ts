@@ -332,7 +332,7 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   show (): void {
-    this.element.style({ display: null })
+    this.element.style({ display: 'flex' })
     this.input.elm.focus()
     this.element.classOn('show')
   }
