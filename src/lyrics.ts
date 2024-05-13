@@ -154,7 +154,7 @@ class Lyrics {
       const updateText = (element: InstanceType<typeof HTML>, text: string): void => {
         const trimmedText = text.trim()
         if (element.getText() !== trimmedText) {
-          element.text(trimmedText ?? DEFAULT_TEXT)
+          element.text(trimmedText != '' ? trimmedText : DEFAULT_TEXT)
         }
       }
 
@@ -172,7 +172,7 @@ class Lyrics {
 
       updateText(this.next, nextLyricText)
       updateText(this.current, lyric.text)
-      updateText(this.prev, prevLyricText)
+      updateText(this.prev, prevLyricText ?? 'ᶻ 𝗓 𐰁 .ᐟ')
 
       index++
       previousLyricId = lyric.id
