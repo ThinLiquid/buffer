@@ -162,6 +162,7 @@ class SearchPalette {
     const icons = new HTML('div').classOn('icons')
 
     const add = new HTML('button')
+      .attr({ title: 'Add to queue' })
       .classOn('material-symbols-sharp')
       .text('playlist_add')
       .appendTo(icons)
@@ -173,6 +174,7 @@ class SearchPalette {
     })
 
     const open = new HTML('button')
+      .attr({ title: 'Open in Spotify' })
       .classOn('material-symbols-sharp')
       .text('open_in_new')
       .appendTo(icons)
@@ -216,6 +218,7 @@ class SearchPalette {
     const icons = new HTML('div').classOn('icons')
 
     const add = new HTML('button')
+      .attr({ title: 'Add to queue' })
       .classOn('material-symbols-sharp')
       .text('playlist_add')
       .appendTo(icons)
@@ -227,6 +230,7 @@ class SearchPalette {
     })
 
     const open = new HTML('button')
+      .attr({ title: 'Open in Spotify' })
       .classOn('material-symbols-sharp')
       .text('open_in_new')
       .appendTo(icons)
@@ -277,6 +281,7 @@ class SearchPalette {
       const icons = new HTML('div').classOn('icons')
 
       const addNext = new HTML('button')
+        .attr({ title: 'Add to queue next' })
         .classOn('material-symbols-sharp')
         .text('playlist_play')
         .appendTo(icons)
@@ -288,6 +293,7 @@ class SearchPalette {
       })
 
       const add = new HTML('button')
+        .attr({ title: 'Add to queue' })
         .classOn('material-symbols-sharp')
         .text('playlist_add')
         .appendTo(icons)
@@ -299,6 +305,7 @@ class SearchPalette {
       })
 
       const open = new HTML('button')
+        .attr({ title: 'Open in Spotify' })
         .classOn('material-symbols-sharp')
         .text('open_in_new')
         .appendTo(icons)

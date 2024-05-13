@@ -58,34 +58,44 @@ class Metadata {
     this.icons = new HTML('div').classOn('icons')
 
     this.playPause = new HTML('button')
+      .attr({ title: 'Play' })
       .classOn('material-symbols-sharp')
       .classOn('filled')
       .text('play_arrow')
 
     this.prevTrack = new HTML('button')
+      .attr({ title: 'Previous' })
       .classOn('material-symbols-sharp')
       .classOn('filled')
       .text('skip_previous')
 
     this.nextTrack = new HTML('button')
+      .attr({ title: 'Next' })
       .classOn('material-symbols-sharp')
       .classOn('filled')
       .text('skip_next')
 
-    this.like = new HTML('button').classOn('material-symbols-sharp').text('add')
+    this.like = new HTML('button')
+      .attr({ title: 'Like' })
+      .classOn('material-symbols-sharp')
+      .text('add')
 
     this.options = new HTML('div').classOn('options')
     this.menu = new HTML('button')
+      .attr({ title: 'Menu' })
       .classOn('material-symbols-sharp')
-      .text('playlist_play')
+      .text('menu')
     this.queuebtn = new HTML('button')
+      .attr({ title: 'Queue' })
       .classOn('material-symbols-sharp')
       .text('queue_music')
 
     this.volume = new HTML('div')
+      .attr({ title: 'Volume' })
       .id('range-slider')
 
     this.crt = new HTML('button')
+      .attr({ title: 'CRT Mode' })
       .classOn('material-symbols-sharp')
       .text('blur_on')
 
@@ -172,14 +182,17 @@ class Metadata {
     // Register the events for the buttons
     this.player.audio.addEventListener('play', () => {
       this.playPause.text('pause')
+        .attr({ title: 'Pause' })
     })
 
     this.player.audio.addEventListener('pause', () => {
       this.playPause.text('play_arrow')
+        .attr({ title: 'Play' })
     })
 
     this.player.audio.addEventListener('ended', () => {
       this.playPause.text('play_arrow')
+        .attr({ title: 'Play' })
     })
 
     // Update the progress bar
