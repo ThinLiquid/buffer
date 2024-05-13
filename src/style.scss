@@ -641,6 +641,12 @@ body {
   pointer-events: none;
   backdrop-filter: blur(0.75px) hue-rotate(20deg) url(#kill) url(#pixelate);
 }
+
+.crt * {
+  letter-spacing: 2px;
+  line-height: 2px;
+}
+
 html {
   background: black;
 }
