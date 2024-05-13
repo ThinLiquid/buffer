@@ -240,6 +240,7 @@ class Metadata {
     // Check if the player is playing
     if (this.player.metadata == null) {
       this.text.text('Not playing')
+      document.title = 'Not playing | ://buffer'
       this.image.attr({ src: '', alt: 'Not playing' })
       return
     }
@@ -253,6 +254,7 @@ class Metadata {
     document.body.style.setProperty('--on-accent', 'black')
 
     // Set the metadata
+    document.title = `${this.player.metadata.title} by ${this.player.metadata.artist} | ://buffer`
     this.image.attr({ src: this.player.metadata?.artwork[0].src, alt: `${this.player.metadata.title} by ${this.player.metadata.artist}` })
     this.text.text(
       `${this.player.metadata?.title}\n${this.player.metadata.artist}\n${this.player.metadata.album}`
