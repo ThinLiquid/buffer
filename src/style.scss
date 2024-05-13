@@ -639,7 +639,8 @@ body {
   z-index: 999999999999999999;
   background-size: 100% 2px, 3px 100%;
   pointer-events: none;
-  backdrop-filter: blur(0.75px) hue-rotate(10deg) url(#kill) url(#pixelate);
+  backdrop-filter: blur(0.75px) url(#kill) url(#pixelate);
+  opacity: 1;
 }
 
 .crt * {

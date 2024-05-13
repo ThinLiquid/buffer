@@ -154,7 +154,7 @@ class Lyrics {
       const updateText = (element: InstanceType<typeof HTML>, text: string): void => {
         const trimmedText = text.trim()
         if (element.getText() !== trimmedText) {
-          element.text(trimmedText != '' ? trimmedText : DEFAULT_TEXT)
+          element.text(trimmedText === '' ? DEFAULT_TEXT : trimmedText)
         }
       }
 
