@@ -24,7 +24,7 @@ class SearchPalette {
     private readonly queue: Queue
   ) {
     // Initialize the elements
-    this.element = new HTML('div')
+    this.element = new HTML('div').style({ display: 'none' })
     this.input = new HTML('input').attr({
       type: 'text',
       placeholder: 'Search on Spotify...'
