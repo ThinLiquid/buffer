@@ -351,7 +351,7 @@ body {
     left: 125px;
     width: var(--progress);
     height: 1px;
-    background: linear-gradient(to right, var(--accent) 100%, transparent 20px);
+    background: linear-gradient(to right, var(--accent) calc(100% - 20px), transparent 20px);
     transition: width 0.2s;
   }
 
