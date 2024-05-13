@@ -58,6 +58,17 @@ class Queue {
   }
 
   /**
+   * Add tracks to the queue after the current track
+   *
+   * @param tracks The tracks to add
+   * @memberof Queue
+   */
+  addNext (...tracks: Track[]): void {
+    this.tracks.splice(this.index, 0, ...this.addUUID(tracks))
+    this.emit('queuechange')
+  }
+
+  /**
    * Add tracks to the queue
    *
    * @param tracks The tracks to add

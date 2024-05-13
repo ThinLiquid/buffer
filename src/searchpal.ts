@@ -265,6 +265,17 @@ class SearchPalette {
         this.queue.add(track)
       })
 
+      const addNext = new HTML('button')
+        .classOn('material-symbols-sharp')
+        .text('playlist_play')
+        .appendTo(icons)
+
+      addNext.on('click', e => {
+        e.preventDefault()
+        e.stopPropagation()
+        this.queue.addNext(track)
+      })
+
       item.appendMany(icon, meta, icons)
       item.appendTo(this.container)
 
