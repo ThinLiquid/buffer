@@ -283,6 +283,11 @@ class Metadata {
     this.text.text(
       `${this.player.metadata?.title}\n${this.player.metadata.artist}\n${this.player.metadata.album}`
     )
+
+    const link = document.querySelectorAll("link[rel~='icon']") as unknown as HTMLLinkElement[]
+    link.forEach((el) => {
+      el.href = this.player.metadata?.artwork[0].src as string
+    })
   }
 }
 
