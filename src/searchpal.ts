@@ -11,6 +11,8 @@ class SearchPalette {
   private readonly container: HTML
   private readonly close: HTML
 
+  private open: boolean
+
   /**
    * Create a new search palette instance
    *
@@ -23,6 +25,7 @@ class SearchPalette {
     private readonly player: Player,
     private readonly queue: Queue
   ) {
+    this.open = false
     // Initialize the elements
     this.element = new HTML('div')
     this.input = new HTML('input').attr({
@@ -347,8 +350,6 @@ class SearchPalette {
     this.element.classOff('show')
     open = false
   }
-
-  open = false
   
   /**
    * Toggle the search palette
@@ -356,11 +357,8 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   toggle (): void {
-    if (open) {
-      this.hide()
-    } else {
-      this.show()
-    }
+    if (open) this.hide();
+    else this.show();
   }
 }
 
