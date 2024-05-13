@@ -170,7 +170,7 @@ class Lyrics {
       this.current.classOn('appear')
       this.next.classOn('appear')
 
-      updateText(this.next, index + 1 !== lyricsData.length ? prevLyricText : 'ᶻ 𝗓 𐰁 .ᐟ')
+      updateText(this.next, index + 1 !== lyricsData.length ? nextLyricText : 'ᶻ 𝗓 𐰁 .ᐟ')
       updateText(this.current, lyric.text)
       updateText(this.prev, prevLyricText)
 
