@@ -172,7 +172,7 @@ class Lyrics {
 
       updateText(this.next, nextLyricText)
       updateText(this.current, lyric.text)
-      updateText(this.prev, prevLyricText ?? 'ᶻ 𝗓 𐰁 .ᐟ')
+      updateText(this.prev, index + 1 === lyricsData.length ? prevLyricText : 'ᶻ 𝗓 𐰁 .ᐟ')
 
       index++
       previousLyricId = lyric.id
