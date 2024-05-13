@@ -643,7 +643,8 @@ body {
 }
 
 .crt * {
-  letter-spacing: 0.25em;
+  letter-spacing: 0.125em;
+  text-transform: full-width;
 }
 
 html {
