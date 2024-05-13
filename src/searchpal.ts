@@ -24,7 +24,7 @@ class SearchPalette {
     private readonly queue: Queue
   ) {
     // Initialize the elements
-    this.element = new HTML('div').styleJs({ display: 'none' })
+    this.element = new HTML('div')
     this.input = new HTML('input').attr({
       type: 'text',
       placeholder: 'Search on Spotify...'
@@ -332,7 +332,6 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   show (): void {
-    this.element.styleJs({ display: 'flex!important' })
     this.input.elm.focus()
     this.element.classOn('show')
   }
@@ -345,9 +344,6 @@ class SearchPalette {
   hide (): void {
     this.input.elm.blur()
     this.element.classOff('show')
-    setTimeout(() => {
-      this.element.styleJs({ display: 'none' })
-    }, 200)
   }
 
   /**
