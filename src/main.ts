@@ -42,11 +42,6 @@ try {
   console.error('Failed to set localForage driver:', e)
 }
 
-const params = new URLSearchParams(window.location.search)
-if (params.has('crt')) {
-  document.body.classList.add('crt')
-}
-
 const auth = (): SpotifyApi => SpotifyApi.withUserAuthorization(
   import.meta.env.VITE_SPOTIFY_CLIENT_ID,
   window.location.origin + window.location.pathname,
