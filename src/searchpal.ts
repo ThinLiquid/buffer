@@ -332,8 +332,8 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   show (): void {
-    this.input.elm.focus()
     this.element.classOn('show')
+    this.input.elm.focus()
   }
 
   /**
