@@ -349,10 +349,10 @@ body {
     position: absolute;
     top: calc(100% - 1px);
     left: 125px;
-    width: var(--progress);
+    width: calc(var(--progress) - (54px * 2.5));
     height: 1px;
-    background: linear-gradient(to right, var(--accent), transparent);
-    transition: width 0.1s ease-in;
+    background: linear-gradient(to right, var(--accent) calc(100% - 100px), transparent);
+    transition: width 1s;
   }
 
   & > img {

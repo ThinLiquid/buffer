@@ -146,10 +146,11 @@ class Lyrics {
         return
       }
 
-      const nextLyricText =
-        index === lyricsData.length - 1 ? '' : lyricsData[index + 1].text
-      const prevLyricText =
-        index === 0 ? DEFAULT_TEXT : lyricsData[index - 1].text
+      const getLyricText = (index: number, defaultText: string): string =>
+        lyricsData[index]?.text ?? defaultText
+
+      const nextLyricText = getLyricText(index + 1, '')
+      const prevLyricText = getLyricText(index - 1, DEFAULT_TEXT)
 
       const updateText = (element: InstanceType<typeof HTML>, text: string): void => {
         const trimmedText = text.trim()
