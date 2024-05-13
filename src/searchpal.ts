@@ -11,7 +11,7 @@ class SearchPalette {
   private readonly container: HTML
   private readonly close: HTML
 
-  private open: boolean
+  private isOpen: boolean
 
   /**
    * Create a new search palette instance
@@ -25,7 +25,7 @@ class SearchPalette {
     private readonly player: Player,
     private readonly queue: Queue
   ) {
-    this.open = false
+    this.isOpen = false
     // Initialize the elements
     this.element = new HTML('div')
     this.input = new HTML('input').attr({
@@ -335,7 +335,7 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   show (): void {
-    open = true
+    isOpen = true
     this.element.classOn('show')
     this.input.elm.focus()
   }
@@ -348,7 +348,7 @@ class SearchPalette {
   hide (): void {
     this.input.elm.blur()
     this.element.classOff('show')
-    open = false
+    isOpen = false
   }
   
   /**
@@ -357,7 +357,7 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   toggle (): void {
-    if (open) this.hide();
+    if (isOpen) this.hide();
     else this.show();
   }
 }
