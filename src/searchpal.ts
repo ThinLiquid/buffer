@@ -332,6 +332,7 @@ class SearchPalette {
    * @memberof SearchPalette
    */
   show (): void {
+    this.input.elm.blur()
     this.element.classOn('show')
     this.input.elm.focus()
   }
@@ -346,13 +347,20 @@ class SearchPalette {
     this.element.classOff('show')
   }
 
+  open = false
+  
   /**
    * Toggle the search palette
    *
    * @memberof SearchPalette
    */
   toggle (): void {
-    this.element.class('show')
+    if (open) {
+      this.hide()
+    } else {
+      this.show()
+    }
+    open = !open
   }
 }
 
