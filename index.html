@@ -42,36 +42,22 @@
         <feComposite operator="in" in2="SourceGraphic"/>
       </filter>
       <filter id="kill">
-        <!-- Red Channel -->
+         <feColorMatrix type="matrix" 
+      result="red_"             
+      values="4 0 0 0 0
+              0 0 0 0 0 
+              0 0 0 0 0 
+              0 0 0 1 0"/>
+    <feOffset in="red_" dx="2" dy="0" result="red"/>
     <feColorMatrix type="matrix" 
-        result="red_"             
-        values="1 0 0 0 0
-                0 0 0 0 0 
-                0 0 0 0 0 
-                0 0 0 1 0"/>
-    <feOffset in="red_" dx="0.1" dy="0" result="red"/>
-
-    <!-- Blue Channel -->
-    <feColorMatrix type="matrix" 
-        result="blue_"             
-        values="0 0 0 0 0
-                0 0 0 0 0 
-                0 0 1 0 0 
-                0 0 0 1 0"/>
-    <feOffset in="blue_" dx="-0.1" dy="0" result="blue"/>
-
-    <!-- Green Channel -->
-    <feColorMatrix type="matrix" 
-        result="green_"             
-        values="0 0 0 0 0
-                0 1 0 0 0 
-                0 0 0 0 0 
-                0 0 0 1 0"/>
-    <feOffset in="green_" dx="0" dy="0.1" result="green"/>    
-
-    <!-- Blend Channels -->
-    <feBlend mode="normal" in="red" in2="blue"/>
-    <feBlend mode="normal" in="SourceGraphic" in2="green"/>
+      in="SourceGraphic"             
+      result="blue_"             
+      values="0 0 0 0 0
+              0 3 0 0 0 
+              0 0 10 0 0 
+              0 0 0 1 0"/>
+    <feOffset in="blue_" dx="-3" dy="0" result="blue"/>    
+    <feBlend mode="screen" in="red" in2="blue"/>
       </filter>
     </svg>
   </body>
