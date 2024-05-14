@@ -37,18 +37,33 @@ class Visualizer {
     this.init()
   }
 
-  private draw (data: Array<{ x: number, lineHeight: number }>): void {
-    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
+  private draw(data: Array<{ x: number, lineHeight: number }>): void {
+    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
-    this.ctx.lineWidth = 1
-    this.ctx.strokeStyle = document.body.style.getPropertyValue('--accent')
-    this.ctx.beginPath()
+    // Set line styles
+    this.ctx.lineWidth = 2;
+    this.ctx.strokeStyle = document.body.style.getPropertyValue('--accent');
+    this.ctx.lineJoin = 'round'; // Smooth joins for curves
 
-    for (const { x, lineHeight } of data) {
-      this.ctx.lineTo(x, this.canvasHeight - lineHeight)
+    // Start drawing path
+    this.ctx.beginPath();
+    
+    // Move to the starting point
+    this.ctx.moveTo(data[0].x, this.canvasHeight - data[0].lineHeight);
+
+    // Draw curve through each point
+    for (let i = 1; i < data.length - 2; i++) {
+      const xc = (data[i].x + data[i + 1].x) / 2;
+      const yc = (this.canvasHeight - data[i].lineHeight + this.canvasHeight - data[i + 1].lineHeight) / 2;
+      this.ctx.quadraticCurveTo(data[i].x, this.canvasHeight - data[i].lineHeight, xc, yc);
     }
 
-    this.ctx.stroke()
+    // Draw the last two points as a straight line
+    this.ctx.lineTo(data[data.length - 2].x, this.canvasHeight - data[data.length - 2].lineHeight);
+    this.ctx.lineTo(data[data.length - 1].x, this.canvasHeight - data[data.length - 1].lineHeight);
+
+    // Stroke the path
+    this.ctx.stroke();
   }
 
   /**
