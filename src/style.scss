@@ -498,7 +498,7 @@ body {
 
     &.appear {
       transform: translateY(0);
-      opacity: 0.75;
+      opacity: 0.5;
 
       &:nth-child(2) {
         opacity: 1;
@@ -646,6 +646,17 @@ body {
 .crt * {
   letter-spacing: 0.125em;
   text-transform: full-width;
+}
+
+.crt {
+  .appear {
+      transform: translateY(0);
+      opacity: 0.75;
+
+      &:nth-child(2) {
+        opacity: 1;
+      }
+    }
 }
 
 html {
