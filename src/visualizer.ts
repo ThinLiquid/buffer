@@ -37,33 +37,36 @@ class Visualizer {
     this.init()
   }
 
+  /*
+   * Render the audio data
+   *
+   * @param data The audio data
+   * @memberof Visualizer
+   */
   private draw(data: Array<{ x: number, lineHeight: number }>): void {
-    this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+    const ctx = this.ctx;
+    const canvasHeight = this.canvasHeight;
+    const accentColor = document.body.style.getPropertyValue('--accent');
+    const path = new Path2D();
 
-    // Set line styles
-    this.ctx.lineWidth = 2;
-    this.ctx.strokeStyle = document.body.style.getPropertyValue('--accent');
-    this.ctx.lineJoin = 'round'; // Smooth joins for curves
+    ctx.clearRect(0, 0, this.canvasWidth, canvasHeight);
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = accentColor;
+    ctx.lineJoin = 'round';
 
-    // Start drawing path
-    this.ctx.beginPath();
-    
-    // Move to the starting point
-    this.ctx.moveTo(data[0].x, this.canvasHeight - data[0].lineHeight);
+    path.moveTo(data[0].x, canvasHeight - data[0].lineHeight);
 
-    // Draw curve through each point
     for (let i = 1; i < data.length - 2; i++) {
       const xc = (data[i].x + data[i + 1].x) / 2;
-      const yc = (this.canvasHeight - data[i].lineHeight + this.canvasHeight - data[i + 1].lineHeight) / 2;
-      this.ctx.quadraticCurveTo(data[i].x, this.canvasHeight - data[i].lineHeight, xc, yc);
+      const yc = (canvasHeight - data[i].lineHeight + canvasHeight - data[i + 1].lineHeight) / 2;
+      path.quadraticCurveTo(data[i].x, canvasHeight - data[i].lineHeight, xc, yc);
     }
 
     // Draw the last two points as a straight line
-    this.ctx.lineTo(data[data.length - 2].x, this.canvasHeight - data[data.length - 2].lineHeight);
-    this.ctx.lineTo(data[data.length - 1].x, this.canvasHeight - data[data.length - 1].lineHeight);
+    path.lineTo(data[data.length - 2].x, canvasHeight - data[data.length - 2].lineHeight);
+    path.lineTo(data[data.length - 1].x, canvasHeight - data[data.length - 1].lineHeight);
 
-    // Stroke the path
-    this.ctx.stroke();
+    ctx.stroke(path);
   }
 
   /**
