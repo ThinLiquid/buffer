@@ -14,14 +14,14 @@ function getLuminance (color: string): number {
 
   if (color.startsWith('#')) {
     color = color.substring(1)
-    r = parseInt(color.substr(0, 2), 16)
-    g = parseInt(color.substr(2, 2), 16)
-    b = parseInt(color.substr(4, 2), 16)
+    r = parseInt(color.substr(0, 2), 16) / 255
+    g = parseInt(color.substr(2, 2), 16) / 255
+    b = parseInt(color.substr(4, 2), 16) / 255
   } else if (color.startsWith('rgb(') && color.endsWith(')')) {
     const rgb = color.substring(4, color.length - 1).split(',')
-    r = parseInt(rgb[0])
-    g = parseInt(rgb[1])
-    b = parseInt(rgb[2])
+    r = parseInt(rgb[0]) / 255
+    g = parseInt(rgb[1]) / 255
+    b = parseInt(rgb[2]) / 255
   } else {
     throw new Error('Invalid color')
   }
@@ -131,16 +131,23 @@ class Color {
     }
 
     // Calculate the contrast ratio with black
-    let contrastRatio = getContrastRatio(color, '#000000')
+    let contrastRatio = getContrastRatio(`rgb(${r},${g},${b})`, '#000000')
 
     // Adjust the color until it meets the desired contrast ratio
     while (contrastRatio < 4.5) {
-      r = Math.min(255, r + 10)
-      g = Math.min(255, g + 10)
-      b = Math.min(255, b + 10)
+      const luminance = getLuminance(`rgb(${r},${g},${b})`)
 
-      color = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
-      contrastRatio = getContrastRatio(color, '#000000')
+      if (luminance < 0.5) {
+        r = Math.min(255, r + 10)
+        g = Math.min(255, g + 10)
+        b = Math.min(255, b + 10)
+      } else {
+        r = Math.max(0, r - 10)
+        g = Math.max(0, g - 10)
+        b = Math.max(0, b - 10)
+      }
+
+      contrastRatio = getContrastRatio(`rgb(${r},${g},${b})`, '#000000')
     }
 
     // Return the adjusted color
