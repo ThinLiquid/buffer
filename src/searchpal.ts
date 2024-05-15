@@ -191,8 +191,8 @@ class SearchPalette {
     item.on('click', () => {
       this.loadAlbumTracks(album.id)
         .then(async () => {
+          await this.hide() 
           await this.player.start()
-          await this.hide()
         })
         .catch(console.error)
     })
@@ -247,8 +247,8 @@ class SearchPalette {
     item.on('click', () => {
       this.loadPlaylistTracks(playlist.id)
         .then(async () => {
-          await this.player.start()
           await this.hide()
+          await this.player.start()
         })
         .catch(console.error)
     })
@@ -320,9 +320,9 @@ class SearchPalette {
       item.appendTo(this.container)
 
       item.on('click', () => {
+        this.hide()
         this.queue.load(track)
         this.player.start().catch(console.error)
-        this.hide()
       })
     })
 
