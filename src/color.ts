@@ -13,9 +13,15 @@ function getLuminance (color: string): number {
   let b
 
   if (color.startsWith('#')) {
-    r = parseInt(color.slice(1, 3), 16) / 255
-    g = parseInt(color.slice(3, 5), 16) / 255
-    b = parseInt(color.slice(5, 7), 16) / 255
+    color = color.substring(1)
+    r = parseInt(color.substr(0, 2), 16)
+    g = parseInt(color.substr(2, 2), 16)
+    b = parseInt(color.substr(4, 2), 16)
+  } else if (color.startsWith('rgb(') && color.endsWith(')')) {
+    const rgb = color.substring(4, color.length - 1).split(',')
+    r = parseInt(rgb[0])
+    g = parseInt(rgb[1])
+    b = parseInt(rgb[2])
   } else {
     throw new Error('Invalid color')
   }
