@@ -77,28 +77,42 @@ class Color {
    * @returns The adjusted color
    */
   adjustContrastColor (color: string): string | null {
-    // Parse the color
     let r
     let g
     let b
+
+    // Check if the color is in hex or rgb format
     if (color.startsWith('#')) {
-      r = parseInt(color.slice(1, 3), 16)
-      g = parseInt(color.slice(3, 5), 16)
-      b = parseInt(color.slice(5, 7), 16)
+      color = color.substring(1)
+      r = parseInt(color.substr(0, 2), 16)
+      g = parseInt(color.substr(2, 2), 16)
+      b = parseInt(color.substr(4, 2), 16)
+    } else if (color.startsWith('rgb(') && color.endsWith(')')) {
+      const rgb = color.substring(4, color.length - 1).split(',')
+      r = parseInt(rgb[0])
+      g = parseInt(rgb[1])
+      b = parseInt(rgb[2])
     } else {
       return null
     }
 
-    // Calculate the perceived luminance
-    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+    // Calculate the luminance of the color and adjust the color
+    if ((0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > threshold) {
+      r = Math.max(0, r - r * 0.1)
+      g = Math.max(0, g - g * 0.1)
+      b = Math.max(0, b - b * 0.1)
+    } else {
+      r = Math.min(255, r + r * 0.1)
+      g = Math.min(255, g + g * 0.1)
+      b = Math.min(255, b + b * 0.1)
+    }
 
-    // Adjust the color based on the luminance
-    const adjustment = luminance < threshold ? 10 : -10
-    r = Math.max(0, Math.min(255, r + adjustment))
-    g = Math.max(0, Math.min(255, g + adjustment))
-    b = Math.max(0, Math.min(255, b + adjustment))
-
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`
+    // Return the adjusted color
+    return color.startsWith('#')
+      ? `#${((1 << 24) + (r << 16) + (g << 8) + b)
+    .toString(16)
+    .slice(1)}`
+      : `rgb(${r},${g},${b})`
   }
 }
 
