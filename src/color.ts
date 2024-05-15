@@ -1,4 +1,4 @@
-const threshold = 0.75
+const threshold = 0.5
 
 class Color {
   /**
@@ -98,13 +98,13 @@ class Color {
 
     // Calculate the luminance of the color and adjust the color
     if ((0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > threshold) {
-      r = Math.max(0, r - r * 0.1)
-      g = Math.max(0, g - g * 0.1)
-      b = Math.max(0, b - b * 0.1)
+      r = Math.max(0, r - r * 0.5)
+      g = Math.max(0, g - g * 0.5)
+      b = Math.max(0, b - b * 0.5)
     } else {
-      r = Math.min(255, r + r * 0.1)
-      g = Math.min(255, g + g * 0.1)
-      b = Math.min(255, b + b * 0.1)
+      r = Math.min(255, r + r * 0.5)
+      g = Math.min(255, g + g * 0.5)
+      b = Math.min(255, b + b * 0.5)
     }
 
     // Return the adjusted color
