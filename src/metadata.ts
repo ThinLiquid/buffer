@@ -227,7 +227,7 @@ class Metadata {
     })
 
     this.download.on('click', () => {
-      var link = document.createElement("a")
+      const link = document.createElement('a')
       link.setAttribute('download', '')
       link.href = this.player.audio.src
       document.body.appendChild(link)
