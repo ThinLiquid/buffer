@@ -1,4 +1,4 @@
-const threshold = 0.75
+const threshold = 0.9
 
 class Color {
   /**
