@@ -1,4 +1,32 @@
-const threshold = 0.5
+const threshold = 0.45
+
+function getContrastRatio (color1: string, color2: string): number {
+  const luminance1 = getLuminance(color1)
+  const luminance2 = getLuminance(color2)
+
+  return luminance1 > luminance2 ? (luminance1 + 0.05) / (luminance2 + 0.05) : (luminance2 + 0.05) / (luminance1 + 0.05)
+}
+
+function getLuminance (color: string): number {
+  let r
+  let g
+  let b
+
+  if (color.startsWith('#')) {
+    r = parseInt(color.slice(1, 3), 16) / 255
+    g = parseInt(color.slice(3, 5), 16) / 255
+    b = parseInt(color.slice(5, 7), 16) / 255
+  } else {
+    throw new Error('Invalid color')
+  }
+
+  // Apply gamma correction
+  r = r <= 0.03928 ? r / 12.92 : ((r + 0.055) / 1.055) ** 2.4
+  g = g <= 0.03928 ? g / 12.92 : ((g + 0.055) / 1.055) ** 2.4
+  b = b <= 0.03928 ? b / 12.92 : ((b + 0.055) / 1.055) ** 2.4
+
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b
+}
 
 class Color {
   /**
@@ -96,22 +124,22 @@ class Color {
       return null
     }
 
-    // Calculate the luminance of the color and adjust the color
-    if ((0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > threshold) {
-      r = Math.max(0, r - 50)
-      g = Math.max(0, g - 50)
-      b = Math.max(0, b - 50)
-    } else {
-      r = Math.min(255, r + 50)
-      g = Math.min(255, g + 50)
-      b = Math.min(255, b + 50)
+    // Calculate the contrast ratio with black
+    let contrastRatio = getContrastRatio(color, '#000000')
+
+    // Adjust the color until it meets the desired contrast ratio
+    while (contrastRatio < 4.5) {
+      r = Math.min(255, r + 10)
+      g = Math.min(255, g + 10)
+      b = Math.min(255, b + 10)
+
+      color = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+      contrastRatio = getContrastRatio(color, '#000000')
     }
 
     // Return the adjusted color
     return color.startsWith('#')
-      ? `#${((1 << 24) + (r << 16) + (g << 8) + b)
-        .toString(16)
-        .slice(1)}`
+      ? `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
       : `rgb(${r},${g},${b})`
   }
 }
