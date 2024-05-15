@@ -493,7 +493,7 @@ body {
 
   & > div {
     opacity: 0;
-    transform: translateY(50%);
+    transform: translateY(25%);
     transition: opacity 0.25s, transform 0.25s;
 
     &.appear {
