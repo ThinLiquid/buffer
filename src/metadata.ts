@@ -80,6 +80,11 @@ class Metadata {
       .classOn('material-symbols-sharp')
       .text('add')
 
+    this.download = new HTML('button')
+      .attr({ title: 'Download' })
+      .classOn('material-symbols-sharp')
+      .text('download')
+
     this.options = new HTML('div').classOn('options')
     this.menu = new HTML('button')
       .attr({ title: 'Menu' })
@@ -132,6 +137,7 @@ class Metadata {
     this.playPause.appendTo(this.icons)
     this.nextTrack.appendTo(this.icons)
     if (this.sdk != null) this.like.appendTo(this.icons) // Only show the like button if the SDK is available
+    this.download.appendTo(this.icons)
 
     this.options.appendTo(document.body)
     this.menu.appendTo(this.options)
@@ -215,9 +221,17 @@ class Metadata {
       this.player.prev().catch(console.error)
     })
 
-    // Register the click events for the buttons
     this.nextTrack.on('click', () => {
       this.player.next().catch(console.error)
+    })
+
+    this.download.on('click', () => {
+      var link = document.createElement("a");
+      link.href = this.player.audio.src;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      delete link;
     })
 
     // Register the click events for the like button
