@@ -1,4 +1,4 @@
-const threshold = 1.5
+const threshold = 0.75
 
 class Color {
   /**
@@ -71,7 +71,7 @@ class Color {
   }
 
   /**
-   * Adjust the contrast of a color
+   * Adjust the contrast of a color for #000000
    *
    * @param color The color to adjust
    * @returns The adjusted color
