@@ -348,7 +348,7 @@ body {
     content: '';
     position: absolute;
     top: calc(100% - 1px);
-    left: calc(125px - (54px * 2.5));
+    left: calc(125px - 54px);
     width: var(--progress);
     height: 1px;
     background: linear-gradient(to right, var(--accent) calc(100% - 100px), transparent);
