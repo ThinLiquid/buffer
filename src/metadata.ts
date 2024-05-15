@@ -23,6 +23,7 @@ class Metadata {
   private readonly playPause: HTML
   private readonly nextTrack: HTML
   private readonly like: HTML
+  private readonly download: HTML
 
   private readonly options: HTML
   private readonly menu: HTML
