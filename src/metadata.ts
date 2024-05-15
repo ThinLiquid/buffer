@@ -227,12 +227,11 @@ class Metadata {
     })
 
     this.download.on('click', () => {
-      var link = document.createElement("a");
-      link.href = this.player.audio.src;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      delete link;
+      var link = document.createElement("a")
+      link.href = this.player.audio.src
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     })
 
     // Register the click events for the like button
