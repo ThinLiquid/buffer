@@ -98,20 +98,20 @@ class Color {
 
     // Calculate the luminance of the color and adjust the color
     if ((0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > threshold) {
-      r = Math.max(0, r - r * 0.5)
-      g = Math.max(0, g - g * 0.5)
-      b = Math.max(0, b - b * 0.5)
+      r = Math.max(0, r - 50)
+      g = Math.max(0, g - 50)
+      b = Math.max(0, b - 50)
     } else {
-      r = Math.min(255, r + r * 0.5)
-      g = Math.min(255, g + g * 0.5)
-      b = Math.min(255, b + b * 0.5)
+      r = Math.min(255, r + 50)
+      g = Math.min(255, g + 50)
+      b = Math.min(255, b + 50)
     }
 
     // Return the adjusted color
     return color.startsWith('#')
       ? `#${((1 << 24) + (r << 16) + (g << 8) + b)
-    .toString(16)
-    .slice(1)}`
+        .toString(16)
+        .slice(1)}`
       : `rgb(${r},${g},${b})`
   }
 }
