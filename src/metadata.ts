@@ -138,7 +138,7 @@ class Metadata {
     this.playPause.appendTo(this.icons)
     this.nextTrack.appendTo(this.icons)
     if (this.sdk != null) this.like.appendTo(this.icons) // Only show the like button if the SDK is available
-    this.download.appendTo(this.icons)
+    if (!window.isSafari) this.download.appendTo(this.icons)
 
     this.options.appendTo(document.body)
     this.menu.appendTo(this.options)
@@ -226,14 +226,16 @@ class Metadata {
       this.player.next().catch(console.error)
     })
 
-    this.download.on('click', () => {
-      const link = document.createElement('a')
-      link.href = this.player.audio.src
-      link.download = `${this.player.metadata?.title}.${window.isSafari ? '.wav' : '.webm'}`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    })
+    if (!window.isSafari) {
+      this.download.on('click', () => {
+        const link = document.createElement('a')
+        link.href = this.player.audio.src
+        link.download = `download.webm`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      })
+    }
 
     // Register the click events for the like button
     if (this.sdk != null) {
