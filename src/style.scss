@@ -642,12 +642,6 @@ body {
   backdrop-filter: blur(0.75px) contrast(1.5) brightness(1.2) saturate(1.2) url(#kill) url(#pixelate);
   opacity: 1;
 }
-
-.crt * {
-  letter-spacing: 0.125em;
-  text-transform: full-width;
-}
-
 .crt {
   .appear {
       transform: translateY(0);
