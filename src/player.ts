@@ -143,35 +143,6 @@ class Player {
   }
 
   /**
-   * Stream audio from a URL
-   *
-   * @private
-   * @param url The URL to stream from
-   * @memberof Player
-   */
-  private async streamAudio (url: string): Promise<void> {
-    this.audio.src = url
-    this.state = 'playing'
-  }
-
-  /**
-   * Fallback to WAV for Safari
-   *
-   * @private
-   * @param url The URL to fallback from
-   * @returns The WAV audio stream
-   * @memberof Player
-   */
-  private async safariAudioFallback (url: string): Promise<string> {
-    // Adapted from https://stackoverflow.com/a/62173861
-    // Download the audio stream
-    const res = await fetch(url)
-    const buffer = await res.arrayBuffer()
-    const wav = await arrayBufferToWav(this.audioCtx, buffer)
-    return URL.createObjectURL(wav)
-  }
-
-  /**
    * Convert a Spotify track to a YouTube Music audio stream
    *
    * @private
@@ -215,14 +186,17 @@ class Player {
     // Find a suitable stream from YouTube Music
     const stream = await this.spotifyToYTMusic(track)
 
-    // Check if the user is using Safari
-    const url = window.isSafari
-      ? await this.safariAudioFallback(stream.url) // Fallback to WAV for Safari
-      : stream.url // Use the original stream URL
-
     // Stream the audio
     this.registerMetadata(track)
-    await this.streamAudio(url)
+    if (this.isSafari) {
+      const res = await fetch(stream.url)
+      const buffer = await res.arrayBuffer()
+      const wav = await arrayBufferToWav(this.audioCtx, buffer)
+      this.audio.srcObject = wav
+    } else {
+      this.audio.src = stream.url
+    }
+    this.state = 'playing'
   }
 
   /**
