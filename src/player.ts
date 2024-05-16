@@ -2,8 +2,7 @@ import { SpotifyApi, Track } from '@spotify/web-api-ts-sdk'
 import YTMusic from './ytmusic'
 import localforage from 'localforage'
 import { AudioStream } from './piped-types'
-import { CachedData, PlayerEvent, PlayerState } from './types'
-import WAV from './wav'
+import { PlayerEvent, PlayerState } from './types'
 import Queue from './queue'
 import { arrayBufferToWav } from './util'
 
@@ -56,7 +55,6 @@ class Player {
    */
   constructor (
     private readonly sdk: SpotifyApi | null,
-    private readonly localForage: typeof localforage,
     private readonly queue: Queue
   ) {
     // Create an audio element
@@ -163,18 +161,6 @@ class Player {
   private async streamAudio (url: string): Promise<void> {
     this.audio.src = url
     this.state = 'playing'
-  }
-
-  private async blobToDataUrl (blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => {
-        const dataURL = reader.result as string
-        resolve(dataURL)
-      };
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
   }
 
   /**
