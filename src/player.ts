@@ -154,49 +154,6 @@ class Player {
   }
 
   /**
-   * Create an audio buffer from the audio element's source
-   *
-   * @private
-   * @returns The audio buffer
-   * @memberof Player
-   */
-  private async createAudioBuffer (): Promise<AudioBuffer> {
-    return await new Promise((resolve, reject) => {
-      // Make a request to get the audio data
-      const request = new XMLHttpRequest()
-      request.open('GET', this.audio.src, true)
-      request.responseType = 'arraybuffer'
-
-      request.onload = async () => {
-        // Decode the audio data
-        await this.audioCtx.decodeAudioData(request.response, resolve, reject)
-      }
-
-      request.send()
-    })
-  }
-
-  /**
-   * Convert a URL to a base64 string
-   *
-   * @private
-   * @param url The URL to convert
-   * @returns The base64 string
-   * @memberof Player
-   */
-  private async urltoB64 (url: string): Promise<string> {
-    const response = await fetch(url)
-    const blob = await response.blob()
-    const reader = new FileReader()
-
-    return await new Promise((resolve, reject) => {
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
-  }
-
-  /**
    * Stream audio from a URL
    *
    * @private
@@ -210,14 +167,13 @@ class Player {
 
   private async blobToDataUrl (blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = () => {
-        const dataURL = reader.result as string;
-        console.log(dataURL)
-        resolve(dataURL);
+        const dataURL = reader.result as string
+        resolve(dataURL)
       };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
     })
   }
 
@@ -235,33 +191,7 @@ class Player {
     const res = await fetch(url)
     const buffer = await res.arrayBuffer()
     const wav = await arrayBufferToWav(this.audioCtx, buffer)
-    return await this.blobToDataUrl(wav)
-  }
-
-  /**
-   * Play audio from buffers
-   *
-   * @private
-   * @param buffers The buffers to play from
-   * @memberof Player
-   */
-  private async playFromBuffers (
-    buffers: CachedData['buffers']
-  ): Promise<void> {
-    // Create an audio buffer
-    const buffer = this.audioCtx.createBuffer(
-      2,
-      buffers.left.byteLength / 4,
-      buffers.sampleRate
-    )
-
-    // Set the audio buffer's channel data
-    buffer.getChannelData(0).set(new Float32Array(buffers.left))
-    buffer.getChannelData(1).set(new Float32Array(buffers.right))
-
-    // Stream the audio
-    this.audio.src = await this.blobToDataUrl(this.wav.audioBufferToBlob(buffer))
-    this.state = 'playing'
+    return URL.createObjectURL(wav)
   }
 
   /**
@@ -305,14 +235,6 @@ class Player {
     this.emit('trackchange')
     this.state = 'loading'
 
-    // Check if the track is cached
-    if (await localforage.getItem(track.id) != null) {
-      const cached = (await localforage.getItem(track.id)) as CachedData
-      this.registerMetadata(track, cached.image)
-      await this.playFromBuffers(cached.buffers)
-      return
-    }
-
     // Find a suitable stream from YouTube Music
     const stream = await this.spotifyToYTMusic(track)
 
@@ -324,18 +246,6 @@ class Player {
     // Stream the audio
     this.registerMetadata(track)
     await this.streamAudio(url)
-
-    // Save the track to cache
-    const buffer = await this.createAudioBuffer()
-    await this.localForage.setItem(track.id, {
-      buffers: {
-        left: buffer.getChannelData(0).buffer,
-        right: buffer.getChannelData(1).buffer,
-        sampleRate: buffer.sampleRate
-      },
-      track,
-      image: await this.urltoB64(track.album.images[0].url)
-    })
   }
 
   /**
