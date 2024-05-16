@@ -1,6 +1,6 @@
 import { SpotifyApi, Track } from '@spotify/web-api-ts-sdk'
 import YTMusic from './ytmusic'
-import localforage from 'localforage'
+import WAV from './wav'
 import { AudioStream } from './piped-types'
 import { PlayerEvent, PlayerState } from './types'
 import Queue from './queue'
