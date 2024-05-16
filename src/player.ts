@@ -73,14 +73,6 @@ class Player {
     return this._yt
   }
 
-  private _wav?: InstanceType<typeof WAV>
-  private get wav (): InstanceType<typeof WAV> {
-    if (this._wav == null) {
-      this._wav = new WAV()
-    }
-    return this._wav
-  }
-
   private _audioCtx?: InstanceType<typeof AudioContext>
   get audioCtx (): InstanceType<typeof AudioContext> {
     if (this._audioCtx == null) {
