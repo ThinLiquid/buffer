@@ -228,8 +228,8 @@ class Metadata {
 
     this.download.on('click', () => {
       const link = document.createElement('a')
-      link.setAttribute('download', `${this.player.metadata?.title} - ${this.player.metadata?.artist}`)
       link.href = this.player.audio.src
+      link.download = `${this.player.metadata?.title}.${window.isSafari ? '.wav' : '.webm'}`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
