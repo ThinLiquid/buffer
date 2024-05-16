@@ -188,7 +188,7 @@ class Player {
 
     // Stream the audio
     this.registerMetadata(track)
-    if (this.isSafari) {
+    if (window.isSafari) {
       const res = await fetch(stream.url)
       const buffer = await res.arrayBuffer()
       const wav = await arrayBufferToWav(this.audioCtx, buffer)
