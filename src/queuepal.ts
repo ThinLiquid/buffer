@@ -73,7 +73,6 @@ class QueuePalette {
       e.stopPropagation()
       this.queue.index = index
       this.player.start().catch(console.error)
-      this.hide()
     })
   }
 
@@ -98,13 +97,6 @@ class QueuePalette {
    */
   private registerEvents (): void {
     document.addEventListener('keydown', event => {
-      // Hide on escape
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        this.hide()
-        return
-      }
-
       // Handle the keybind
       if (!((event.ctrlKey || event.metaKey) && event.key === 'l')) {
         return
