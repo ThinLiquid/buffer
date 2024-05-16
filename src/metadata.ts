@@ -228,12 +228,7 @@ class Metadata {
 
     if (!window.isSafari) {
       this.download.on('click', () => {
-        const link = document.createElement('a')
-        link.href = this.player.audio.src
-        link.download = `download.webm`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+        window.open(this.player.audio.src)
       })
     }
 
