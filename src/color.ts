@@ -134,7 +134,7 @@ class Color {
     let contrastRatio = getContrastRatio(`rgb(${r},${g},${b})`, '#000000')
 
     // Adjust the color until it meets the desired contrast ratio
-    while (contrastRatio < 4.5) {
+    while (contrastRatio < 7) {
       const luminance = getLuminance(`rgb(${r},${g},${b})`)
 
       if (luminance < 0.5) {
