@@ -3,7 +3,7 @@ import { SearchResults, SearchVideo, Video } from './piped-types'
 class YTMusic {
   instance: string
   constructor () {
-    this.instance = 'https://pipedapi.reallyaweso.me'
+    this.instance = 'https://pipedapi.coldforge.xyz'
   }
 
   /**
