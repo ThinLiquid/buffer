@@ -5,7 +5,6 @@ import 'material-symbols'
 
 import HTML from '@datkat21/html'
 import { SpotifyApi } from '@spotify/web-api-ts-sdk'
-import localforage from 'localforage'
 import { registerSW } from 'virtual:pwa-register'
 
 declare global {
@@ -31,16 +30,6 @@ const updateSW = registerSW({
 })
 
 window.onload = async () => { await updateSW() }
-
-// Set localForage drivers
-try {
-  await localforage.setDriver([
-    localforage.INDEXEDDB,
-    localforage.LOCALSTORAGE
-  ])
-} catch (e) {
-  console.error('Failed to set localForage driver:', e)
-}
 
 const auth = (): SpotifyApi => SpotifyApi.withUserAuthorization(
   import.meta.env.VITE_SPOTIFY_CLIENT_ID,
@@ -68,7 +57,7 @@ window.onload = async () => {
   const queue = new Queue.default()
 
   const Player = await import('./player')
-  const player = new Player.default(sdk, localforage, queue)
+  const player = new Player.default(sdk, queue)
 
   const Visualizer = await import('./visualizer')
   // eslint-disable-next-line no-new
