@@ -1,6 +1,5 @@
 import { SpotifyApi, Track } from '@spotify/web-api-ts-sdk'
 import YTMusic from './ytmusic'
-import WAV from './wav'
 import { AudioStream } from './piped-types'
 import { PlayerEvent, PlayerState } from './types'
 import Queue from './queue'
