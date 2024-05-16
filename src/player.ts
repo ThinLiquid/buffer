@@ -208,6 +208,10 @@ class Player {
     this.state = 'playing'
   }
 
+  private async blobToDataUrl (blob: Blob): Promise<void> {
+    return await new Promise(r => {let a=new FileReader(); a.onload=r; a.readAsDataURL(blob)}).then(e => e.target.result);
+  }
+
   /**
    * Fallback to WAV for Safari
    *
@@ -222,7 +226,7 @@ class Player {
     const res = await fetch(url)
     const buffer = await res.arrayBuffer()
     const wav = await arrayBufferToWav(this.audioCtx, buffer)
-    return URL.createObjectURL(wav)
+    return await blobToDataUrl(wav)
   }
 
   /**
@@ -247,7 +251,7 @@ class Player {
     buffer.getChannelData(1).set(new Float32Array(buffers.right))
 
     // Stream the audio
-    this.audio.src = URL.createObjectURL(this.wav.audioBufferToBlob(buffer))
+    this.audio.src = await blobToDataUrl(this.wav.audioBufferToBlob(buffer))
     this.state = 'playing'
   }
 
