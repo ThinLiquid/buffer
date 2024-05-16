@@ -207,8 +207,8 @@ class Player {
    * @param image The image to display
    * @memberof Player
    */
-  private registerMetadata (track: Track, image?: string): void {
-    this.metadata = this.createMetadata(track, image)
+  private registerMetadata (track: Track): void {
+    this.metadata = this.createMetadata(track)
     this.emit('metadatachange')
   }
 
@@ -221,10 +221,9 @@ class Player {
    * @returns The metadata
    * @memberof Player
    */
-  private createMetadata (track: Track, image?: string): MediaMetadata {
+  private createMetadata (track: Track): MediaMetadata {
     // Create an array of artwork
     const artwork = [
-      ...(image != null ? [{ src: image }] : []),
       ...(navigator.onLine
         ? track.album.images.map(image => ({
           src: image.url,
