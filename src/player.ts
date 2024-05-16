@@ -208,8 +208,16 @@ class Player {
     this.state = 'playing'
   }
 
-  private async blobToDataUrl (blob: Blob): Promise<void> {
-    return await new Promise(r => {let a=new FileReader(); a.onload=r; a.readAsDataURL(blob)}).then(e => e.target.result);
+  private async blobToDataUrl (blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataURL = reader.result as string;
+        resolve(dataURL);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    })
   }
 
   /**
@@ -226,7 +234,7 @@ class Player {
     const res = await fetch(url)
     const buffer = await res.arrayBuffer()
     const wav = await arrayBufferToWav(this.audioCtx, buffer)
-    return await blobToDataUrl(wav)
+    return await this.blobToDataUrl(wav)
   }
 
   /**
@@ -251,7 +259,7 @@ class Player {
     buffer.getChannelData(1).set(new Float32Array(buffers.right))
 
     // Stream the audio
-    this.audio.src = await blobToDataUrl(this.wav.audioBufferToBlob(buffer))
+    this.audio.src = await this.blobToDataUrl(this.wav.audioBufferToBlob(buffer))
     this.state = 'playing'
   }
 
