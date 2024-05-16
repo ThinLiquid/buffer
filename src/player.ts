@@ -213,6 +213,7 @@ class Player {
       const reader = new FileReader();
       reader.onload = () => {
         const dataURL = reader.result as string;
+        console.log(dataURL)
         resolve(dataURL);
       };
       reader.onerror = reject;
