@@ -18,7 +18,7 @@ class Lyrics {
   private readonly next: HTML
 
   private currentTrack: Track | null = null
-  private intervalId: Timeout | null = null
+  private intervalId: ReturnType<typeof setInterval> | null = null
 
   constructor (private readonly player: Player, private readonly queue: Queue) {
     this.container = new HTML('div').classOn('lyrics')
