@@ -131,69 +131,45 @@ class Lyrics {
       currentTime <= lyric.end - LYRIC_OFFSET &&
       lyric.id !== previousLyricId
 
-    const updateLyrics = async (): Promise<void> => {
-      this.currentTrack = this.queue.currentTrack
-      let index: number = lyricsData.findIndex(
-        lyric =>
-          this.player.audio.currentTime >= (lyric.start ?? -Infinity) - LYRIC_OFFSET &&
-          this.player.audio.currentTime <= lyric.end - LYRIC_OFFSET
-      )
-
-      const lyric = lyricsData[index]
-
-      // Check if index is -1, if so, return early
-      if (index === -1 || !isCurrentLyric(lyric, this.player.audio.currentTime)) {
+    const updateLyrics = (): void => {
+      if (this.queue.currentTrack !== this.currentTrack) {
+        this.player.audio.ontimeupdate = null
         return
       }
 
-      const getLyricText = (index: number, defaultText: string): string =>
-        lyricsData[index]?.text ?? defaultText
+      const currentTime = this.player.audio.currentTime
+      let index: number = lyricsData.findIndex(
+        lyric => currentTime >= (lyric.start ?? -Infinity) - LYRIC_OFFSET &&
+        currentTime <= lyric.end - LYRIC_OFFSET
+      )
 
-      const nextLyricText = getLyricText(index + 1, '')
-      const prevLyricText = getLyricText(index - 1, DEFAULT_TEXT)
-
-      const updateText = (element: InstanceType<typeof HTML>, text: string): void => {
-        const trimmedText = text.trim()
-        if (element.getText() !== trimmedText) {
-          element.text(trimmedText === '' ? DEFAULT_TEXT : trimmedText)
-        }
+      if (index === -1 || !isCurrentLyric(lyricsData[index], currentTime)) {
+        return
       }
+
+      const lyric = lyricsData[index]
+      const nextLyricText = lyricsData[index + 1]?.text ?? ''
+      const prevLyricText = lyricsData[index - 1]?.text ?? DEFAULT_TEXT
 
       this.current.classOff('appear')
       this.prev.classOff('appear')
       this.next.classOff('appear')
 
-      await new Promise(resolve => {
-        setTimeout(resolve, APPEAR_DELAY)
-      })
+      setTimeout(() => {
+        this.prev.classOn('appear')
+        this.current.classOn('appear')
+        this.next.classOn('appear')
 
-      this.prev.classOn('appear')
-      this.current.classOn('appear')
-      this.next.classOn('appear')
+        this.prev.text(prevLyricText)
+        this.current.text(lyric.text)
+        this.next.text(nextLyricText)
 
-      updateText(this.next, index + 1 !== lyricsData.length ? nextLyricText : 'ᶻ 𝗓 𐰁 .ᐟ')
-      updateText(this.current, lyric.text)
-      updateText(this.prev, prevLyricText)
-
-      index++
-      previousLyricId = lyric.id
-
-      if (index !== lyricsData.length) {
-        return
-      }
-
-      this.player.audio.ontimeupdate = null
+        previousLyricId = lyric.id
+      }, APPEAR_DELAY)
     }
 
-    requestAnimationFrame(() => { updateLyrics().catch(console.error) })
-
-    this.player.audio.ontimeupdate = () => {
-      if (
-        (this.queue.currentTrack as any)._id !==
-    (this.currentTrack as any)._id
-      ) { this.player.audio.ontimeupdate = null }
-      requestAnimationFrame(() => { updateLyrics().catch(console.error) })
-    }
+    this.player.audio.ontimeupdate = updateLyrics
+    updateLyrics()
   }
 }
 
