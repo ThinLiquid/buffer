@@ -18,8 +18,10 @@ class Lyrics {
   private readonly next: HTML
 
   private currentTrack: Track | null = null
+  private lyricsData: Lyric[] = []
+  private previousLyricId: string = ''
 
-  constructor (private readonly player: Player, private readonly queue: Queue) {
+  constructor(private readonly player: Player, private readonly queue: Queue) {
     this.container = new HTML('div').classOn('lyrics')
 
     this.prev = new HTML('div')
@@ -36,7 +38,7 @@ class Lyrics {
    * @param track The track to get the lyrics of
    * @returns The lyrics of the track
    */
-  private async getLyrics (track: Track): Promise<LyricsResponse> {
+  private async getLyrics(track: Track): Promise<LyricsResponse> {
     return await fetch(
       `https://lrclib.net/api/get?track_name=${encodeURIComponent(
         track.name
@@ -57,7 +59,7 @@ class Lyrics {
    * @private
    * @memberof Lyrics
    */
-  private init (): void {
+  private init(): void {
     // Append the elements to the document
     this.container.appendTo(document.body)
 
@@ -75,7 +77,7 @@ class Lyrics {
    * @private
    * @memberof Lyrics
    */
-  private handleNoLyrics (): void {
+  private handleNoLyrics(): void {
     this.prev.text('')
     this.current.text(DEFAULT_TEXT)
     this.next.text("Can't find lyrics for this song.")
@@ -91,7 +93,7 @@ class Lyrics {
    * @private
    * @memberof Lyrics
    */
-  private registerEvents (): void {
+  private registerEvents(): void {
     this.player.on('trackchange', () => {
       this.handleLyrics().catch(console.error)
     })
@@ -103,73 +105,71 @@ class Lyrics {
    * @private
    * @memberof Lyrics
    */
-  private async handleLyrics (): Promise<void> {
+  private async handleLyrics(): Promise<void> {
     this.player.audio.currentTime = 0
     const lyrics = await this.getLyrics(this.queue.currentTrack)
     if (lyrics?.syncedLyrics == null) {
       this.handleNoLyrics()
       return
     }
-    const lyricsData = lrcParser(lyrics.syncedLyrics).scripts as unknown as Lyric[]
+    this.lyricsData = lrcParser(lyrics.syncedLyrics).scripts as unknown as Lyric[]
 
-    lyricsData.forEach(lyric => {
+    this.lyricsData.forEach(lyric => {
       lyric.id = uuid.v4()
     })
 
-    let previousLyricId = ''
+    this.previousLyricId = ''
 
     this.prev.text('')
     this.current.text(DEFAULT_TEXT)
-    this.next.text(lyricsData[0].text)
+    this.next.text(this.lyricsData[0].text)
 
     this.prev.classOn('appear')
     this.current.classOn('appear')
     this.next.classOn('appear')
 
-    const isCurrentLyric = (lyric: Lyric, currentTime: number): boolean =>
-      currentTime >= (lyric.start ?? -Infinity) - LYRIC_OFFSET &&
-      currentTime <= lyric.end - LYRIC_OFFSET &&
-      lyric.id !== previousLyricId
+    this.player.audio.ontimeupdate = () => this.updateLyrics()
+    this.updateLyrics() // Initial call to set the first lyrics
+  }
 
-    const updateLyrics = (): void => {
-      if (this.queue.currentTrack !== this.currentTrack) {
-        this.player.audio.ontimeupdate = null
-        return
-      }
+  /**
+   * Update the lyrics based on the current time of the audio
+   *
+   * @private
+   * @memberof Lyrics
+   */
+  private updateLyrics(): void {
+    const currentTime = this.player.audio.currentTime
 
-      const currentTime = this.player.audio.currentTime
-      let index: number = lyricsData.findIndex(
-        lyric => currentTime >= (lyric.start ?? -Infinity) - LYRIC_OFFSET &&
+    const index = this.lyricsData.findIndex(
+      lyric =>
+        currentTime >= (lyric.start ?? -Infinity) - LYRIC_OFFSET &&
         currentTime <= lyric.end - LYRIC_OFFSET
-      )
+    )
 
-      if (index === -1 || !isCurrentLyric(lyricsData[index], currentTime)) {
-        return
-      }
-
-      const lyric = lyricsData[index]
-      const nextLyricText = lyricsData[index + 1]?.text ?? ''
-      const prevLyricText = lyricsData[index - 1]?.text ?? DEFAULT_TEXT
-
-      this.current.classOff('appear')
-      this.prev.classOff('appear')
-      this.next.classOff('appear')
-
-      setTimeout(() => {
-        this.prev.classOn('appear')
-        this.current.classOn('appear')
-        this.next.classOn('appear')
-
-        this.prev.text(prevLyricText)
-        this.current.text(lyric.text)
-        this.next.text(nextLyricText)
-
-        previousLyricId = lyric.id
-      }, APPEAR_DELAY)
+    if (index === -1 || this.lyricsData[index].id === this.previousLyricId) {
+      return
     }
 
-    this.player.audio.ontimeupdate = updateLyrics
-    updateLyrics()
+    const lyric = this.lyricsData[index]
+    const nextLyricText = this.lyricsData[index + 1]?.text ?? ''
+    const prevLyricText = this.lyricsData[index - 1]?.text ?? DEFAULT_TEXT
+
+    this.current.classOff('appear')
+    this.prev.classOff('appear')
+    this.next.classOff('appear')
+
+    setTimeout(() => {
+      this.prev.classOn('appear')
+      this.current.classOn('appear')
+      this.next.classOn('appear')
+
+      this.prev.text(prevLyricText)
+      this.current.text(lyric.text)
+      this.next.text(nextLyricText)
+
+      this.previousLyricId = lyric.id
+    }, APPEAR_DELAY)
   }
 }
 
