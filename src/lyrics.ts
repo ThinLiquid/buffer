@@ -12,7 +12,6 @@ const DEFAULT_TEXT = '♫⋆｡♪ ₊˚♬ ﾟ.'
 
 class Lyrics {
   private readonly container: HTML
-
   private readonly prev: HTML
   private readonly current: HTML
   private readonly next: HTML
@@ -22,36 +21,34 @@ class Lyrics {
 
   constructor (private readonly player: Player, private readonly queue: Queue) {
     this.container = new HTML('div').classOn('lyrics')
-
     this.prev = new HTML('div')
     this.current = new HTML('div')
     this.next = new HTML('div')
-
     this.init()
   }
 
-  private async getLyrics (track: Track): Promise<LyricsResponse> {
-    return await fetch(
-      `https://lrclib.net/api/get?track_name=${encodeURIComponent(
-        track.name
-      )}&album_name=${encodeURIComponent(
-        track.album.name
-      )}&artist_name=${encodeURIComponent(track.artists[0].name)}&duration=${
-        track.duration_ms / 1000
-      }`
-    ).then(async res => {
-      if (res.ok) return await res.json()
+  private async getLyrics (track: Track): Promise<LyricsResponse | null> {
+    try {
+      const res = await fetch(
+        `https://lrclib.net/api/get?track_name=${encodeURIComponent(track.name)}&album_name=${encodeURIComponent(track.album.name)}&artist_name=${encodeURIComponent(track.artists[0].name)}&duration=${track.duration_ms / 1000}`
+      )
+      if (res.ok) {
+        return await res.json()
+      } else {
+        console.error(`Failed to fetch lyrics: ${res.statusText}`)
+        return null
+      }
+    } catch (error) {
+      console.error(`Error fetching lyrics: ${error}`)
       return null
-    })
+    }
   }
 
   private init (): void {
     this.container.appendTo(document.body)
-
     this.prev.appendTo(this.container)
     this.current.appendTo(this.container)
     this.next.appendTo(this.container)
-
     this.registerEvents()
   }
 
@@ -59,7 +56,6 @@ class Lyrics {
     this.prev.text('')
     this.current.text(DEFAULT_TEXT)
     this.next.text("Can't find lyrics for this song.")
-
     this.prev.classOn('appear')
     this.current.classOn('appear')
     this.next.classOn('appear')
@@ -72,23 +68,27 @@ class Lyrics {
   }
 
   private async handleLyrics (): Promise<void> {
-    this.player.audio.currentTime = 0
-    const lyrics = await this.getLyrics(this.queue.currentTrack)
-    if (lyrics?.syncedLyrics == null) {
+    if (!this.queue.currentTrack) {
+      console.error('No current track found in the queue.')
       this.handleNoLyrics()
       return
     }
-    const lyricsData = lrcParser(lyrics.syncedLyrics).scripts as unknown as Lyric[]
 
-    lyricsData.forEach(lyric => {
-      lyric.id = uuid.v4()
-    })
+    this.player.audio.currentTime = 0
+    const lyrics = await this.getLyrics(this.queue.currentTrack)
+    if (!lyrics || !lyrics.syncedLyrics) {
+      this.handleNoLyrics()
+      return
+    }
+
+    const lyricsData = lrcParser(lyrics.syncedLyrics).scripts as unknown as Lyric[]
+    lyricsData.forEach(lyric => { lyric.id = uuid.v4() })
 
     let previousLyricId = ''
 
     this.prev.text('')
     this.current.text(DEFAULT_TEXT)
-    this.next.text(lyricsData[0].text)
+    this.next.text(lyricsData[0]?.text ?? DEFAULT_TEXT)
 
     this.prev.classOn('appear')
     this.current.classOn('appear')
@@ -102,9 +102,7 @@ class Lyrics {
     const updateLyrics = (): void => {
       const currentTime = this.player.audio.currentTime
       const index = lyricsData.findIndex(
-        lyric =>
-          currentTime >= (lyric.start ?? -Infinity) - LYRIC_OFFSET &&
-          currentTime <= lyric.end - LYRIC_OFFSET
+        lyric => currentTime >= (lyric.start ?? -Infinity) - LYRIC_OFFSET && currentTime <= lyric.end - LYRIC_OFFSET
       )
 
       if (index === -1 || !isCurrentLyric(lyricsData[index], currentTime)) {
@@ -144,7 +142,7 @@ class Lyrics {
     }
 
     this.intervalId = setInterval(() => {
-      if ((this.queue.currentTrack as any)._id !== (this.currentTrack as any)._id) {
+      if (this.queue.currentTrack !== this.currentTrack) {
         clearInterval(this.intervalId!)
         this.intervalId = null
       } else {
